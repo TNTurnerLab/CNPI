@@ -219,7 +219,7 @@ Use sort and filter commands to get rid of unnecessary lines
 
 
 ### Copy Number Across Chromosome 6
-![Normal Chromosome 6](https://github.com/TNTurnerLab/CNPI/blob/main/New_Codes/photos/NA12878_Chr6.png)
+![Normal Chromosome 6](https://github.com/TNTurnerLab/CNPI/blob/main/Photos/Plotting/NA12878_Chr6.png)
 
 ### Abnormal Copy Number Across Chromosome 12
 ![Entire Duplicated Chromosome](https://github.com/TNTurnerLab/CNPI/blob/main/New_Codes/photos/NA12739-chr12_0-133263864.png)
