@@ -25,7 +25,7 @@ DNA Copy Number, in the human genome, is typically two as one copy of each chrom
 
 ## Example File input
      
-   [Example Data](https://github.com/TNTurnerLab/CNPI/tree/main/New_Codes/Example_Data)
+   [Example Data](https://github.com/TNTurnerLab/CNPI/tree/main/Example_Data/Example_Reference_Files)
 
 <div align="center">
 
