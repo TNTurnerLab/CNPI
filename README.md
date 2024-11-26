@@ -205,7 +205,7 @@ Use sort and filter commands to get rid of unnecessary lines
 
 
 ### Duplication Event Along Chromosome 16
-![Duplication Event Along Chromosome](https://github.com/TNTurnerLab/CNPI/blob/main/New_Codes/photos/chr16_35207948-35524422.png)
+![Duplication Event Along Chromosome](https://github.com/TNTurnerLab/CNPI/blob/main/Photos/Plotting/chr16_black.pdf)
 
 </div>
 
