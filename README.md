@@ -185,7 +185,17 @@ Use sort and filter commands to get rid of unnecessary lines
   
     usage: CNPI_plotting.py -f FILE -r REFERENCE [-w MINWINDOW] [-i WINDOWBUFFER] [-se SELECTCHRM] [-start STARTPOS] [-stop STOPPOS] [-gstat GSTAT_TXT] [-p [file1 [file2]]] [-h]
 
-   
+##Dockers
+
+##Linux
+
+    docker run -v "$(pwd):/app:ro" -it jackust/cn_docker:CNPI_Linux_V1.0 
+
+##Mac
+
+    docker run -v "$(pwd):/app:ro" -it jackust/cn_docker:CNPI_Mac_V1.0
+
+
 # Example Pictures
 
 ## Plotting of a Region Outside of Normal (1.3 - 2.7) Threshold
