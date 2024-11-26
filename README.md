@@ -12,23 +12,19 @@ This program (CNPI) is designed to read through gzipped output files generated u
 
 ## Background
 
-DNA Copy Number, in the human genome, is typically two as one copy of each chromosome is inherited from each parent. Most regions of the genome have a copy number of two except in males where there is a copy of one for chromosomes X and Y. This is not always the case as there are variations within everyone's genome as some regions have copy numbers deviating from the expected value. Therefore chromosomes, genes, or regions will have varied copy numbers. Still typically around one or two however they can vary as duplications and deletions are copy number variants (CNVs). CNVs can be ininherited trait from a parent or they can be de novo in the child. Our goal is to identify abnormal regions of a person’s genome based upon all this information given copy number data and reference regions provided by the user of this program. Genotyping across regions, karyotyping, summary statistics, and images can be produced to do all these tasks. The hope is to figure out which parent the CNVs are coming from andalterations that lead to phenotypic consequences.   
+DNA Copy Number, in the human genome, is typically two as one copy of each chromosome is inherited from each parent. Most regions of the genome have a copy number of two except in males where there is a copy of one for chromosomes X and Y. This is not always the case as there are variations within everyone's genome as some regions have copy numbers deviating from the expected value. Therefore chromosomes, genes, or regions will have varied copy numbers. Still typically around one or two however they can vary as duplications and deletions are copy number variants (CNVs). CNVs can be ininherited trait from a parent or they can be de novo in the child. Our goal is to identify abnormal regions of a person’s genome based upon all this information given copy number data and reference regions provided by the user of this program. Genotyping across regions, karyotyping, summary statistics, and images can be produced to do all these tasks. The hope is to figure out which parent the CNVs are coming from andalterations that lead to phenotypic consequences. 
 
-## Selection Criteria for File Containing Region of Interest from the UCSC Genome Browser
+## Goals of CNPI
 
-   Clade Mammal  
-   Genome: Human  
-   Assembly: Dec, 2013 (GRCh38/hg38)   
-   Group: Genes and Gene Predictions   
-   Track: NCBI RefSeq   
-   Table: RefSeq Curated (ncbiRefSeqCurated)   
-   Region: Genome   
-   Output format: BED - browser extensible data   
-   Output filename: RefSeq_Curated_6/12/24.bed   
-   Output field separator: tsv (tab-separated)   
-   File type returned: Plain text
-   
-   [UCSC Genome Table Browser](https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=2365725401_lz88zrCUmlqgWakOGcY7SD0F83tx)   
+1. Scanning through both the region of interest file (RefSeq file in the example) and the .gz file (QuicK-mer2 output file) and creating a copy number tool for each region. Windows are generally smaller than the regions so many windows will be included within each region location. 
+2. Statistics will be carried out for each region including copy number average and weighted average (weight is the length of windows included in a region), standard deviation, coefficient of variation, size of region, and total amount of windows included within each region.
+3. Karyotyping of individual based upon the average of all CN windows for an entire chromosome.
+4. Identify Chromosomal sex based off of X and Y chromosome copy number.
+5. It is thought that region locations with an abnormal high or low count number should be investigated more and could be indicative of phenotypic consequences.
+6. In the case of count numbers that are abnormally high these regions should be recorded with the possibility of a closer look into why.
+
+## Example File input
+     
    [Example Data](https://github.com/TNTurnerLab/CNPI/tree/main/New_Codes/Example_Data)
 
 <div align="center">
@@ -58,15 +54,6 @@ Any Tab Delimited File in this format will work as long as the first 4 columns a
 |chr1	|88348	|108310	|2.107214|
 
 </div>
-
-## Goals of CNPI
-
-1. Scanning through both the region of interest file (RefSeq file in the example) and the .gz file (QuicK-mer2 output file) and creating a copy number tool for each region. Windows are generally smaller than the regions so many windows will be included within each region location. 
-2. Statistics will be carried out for each region including copy number average and weighted average (weight is the length of windows included in a region), standard deviation, coefficient of variation, size of region, and total amount of windows included within each region.
-3. Karyotyping of individual based upon the average of all CN windows for an entire chromosome.
-4. Identify Chromosomal sex based off of X and Y chromosome copy number.
-5. It is thought that region locations with an abnormal high or low count number should be investigated more and could be indicative of phenotypic consequences.
-6. In the case of count numbers that are abnormally high these regions should be recorded with the possibility of a closer look into why.
 
 
 ## Overall Notes
