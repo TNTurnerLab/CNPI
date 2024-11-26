@@ -146,7 +146,7 @@ This program is designed to read through .gz files containing count number infor
 </div>
 
 ## Process
-[How CNPI Code Runs]()
+[How CNPI Code Runs](https://github.com/TNTurnerLab/CNPI/blob/main/Photos/Algorithm_Process.svg)
 
 
 # Python Plotting
