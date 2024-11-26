@@ -146,13 +146,8 @@ This program is designed to read through .gz files containing count number infor
 </div>
 
 ## Process
-[How CNPI Code Runs](https://github.com/TNTurnerLab/CNPI/blob/main/New_Codes/CNPI_Process)
+[How CNPI Code Runs]()
 
-
-## Reference Rows
-For Finding amount of entries in files. Can save compute time when processessing many samples at once. Amount of entries here can be then fed into the CNPI program since every quickmer genome and reference file will have the same amount of entires
- 
-      g++ Arg_BedPathRows.cpp -o Arg_BedPathRows -lz && time ./Arg_BedPathRows -r {unsorted_region_file}
 
 # Python Plotting
 
