@@ -88,7 +88,7 @@ This program is designed to read through .gz files containing count number infor
     g++ -std=c++11 CNPI.cpp -o CNPI -lz  
     ./CNPI -d {region.bed} -g {quickmer2.gz} 
 ### As a single command:
-    g++ -std=c++11 differentLengths.cpp -o CNPI -lz && time ./CNPI -d {sorted_annotated_region.bed} -g {quickmer2.gz file} -n {number_of_reference_regions} -o {output_file_names}
+    g++ -std=c++11 CNPI.cpp -o CNPI -lz && time ./CNPI -d {sorted_annotated_region.bed} -g {quickmer2.gz file} -n {number_of_reference_regions} -o {output_file_names}
 
 ## Options   
     -d or -bed_gz_path: .bed or .bed.gz file with regions to match copy number windows up against - Required!  
