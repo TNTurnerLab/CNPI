@@ -81,7 +81,7 @@ Any Tab Delimited File in this format will work as long as the first 4 columns a
 This program is designed to read through .gz files containing count number information at specific windows and matching these windows up with region locations of a ref_seq file. RefSeq_Curated.bed file was taken from NCBI with useful information being region name, chromosome, and start and stop information. Relevant information from the .gz file included chromosome, start and stop location of windows, and count number for each window. 
 
 ## The following information will be recorded for each reference region:  
-|Transcript|	Chromosome|	Start|	Stop|	CN_Average|	Weighted_Avg|	CN_SD|	CN_SV|	Region_Size|	Total_Windows|	Gen_Variation|
+|Chromosome|	Start|	Stop|	Region|	CN_Average|	Weighted_Avg|	CN_SD|	CN_SV|	Region_Size|	Total_Windows|	Gen_Variation|
 |----------|:-----------:|:----:|:-----:|:---------:|:-----------:|:-----:|:------:|:------------:|:--------------:|:------------:|
 
 ## Compile and Run Commands:   
