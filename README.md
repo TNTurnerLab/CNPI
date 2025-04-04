@@ -220,15 +220,15 @@ CNPI.cpp has the capability of running at a less that $0.01 cost on AWS Lamda
             "d": "Input Reference.bed (WGS_sorted_filtered.bed)",
             "g": "Input QuicKmer2.bed.gz (NA12878_sorted_filtered.bed.gz)",
             "o": "choose output label for files: /tmp/name (/tmp/NA12878)",
-            "n": "40101",
-            "c": "2295745",
-            "r": "",
-            "t": "",
-            "s": "",
-            "l": "",
-            "u": "",
-            "h": "",
-            "w": ""}
+            "n": "optional argument",
+            "c": "optional argument",
+            "r": "optional argument",
+            "t": "optional argument",
+            "s": "optional argument",
+            "l": "optional argument",
+            "u": "optional argument",
+            "h": "optional argument",
+            "w": "optional argument"}
         }
 
 
