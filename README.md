@@ -200,7 +200,7 @@ Use sort and filter commands to get rid of unnecessary lines
 
 ## AWS Lambda
 
-CNPI.cpp has the capability of running at a less that $0.01 cost on AWS Lamda
+CNPI.cpp has the capability of running for less than $0.01 per sample on AWS Lamda
 ### Steps
 1. With AWS account go to: Lambda -> Functions -> Create Function
 2. Choose a function name and select Containter image
