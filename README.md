@@ -210,7 +210,7 @@ CNPI.cpp has the capability of running for less than $0.01 per sample on AWS Lam
 4. Keep all other confugurations as default and select Create function
 5. Once the function is created update Configurations
    - -> Configuration -> General configuration -> Increase Memory, Ephemeral storage, and Timeout as needed
-   - -> Permissions -> select Role Name link -> policies -> select S3 full access -> actions -> attach to function
+   - -> Permissions -> select Role Name link -> policies -> select AmazonS3FullAccess -> actions -> attach to function
 6. Back in your created function update -> Test - Event Json to:
 
         {
