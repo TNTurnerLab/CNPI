@@ -198,6 +198,39 @@ Use sort and filter commands to get rid of unnecessary lines
 
     docker run -v "$(pwd):/app:ro" -it jackust/cn_docker:CNPI_Mac_V1.0
 
+## AWS Lambda
+
+CNPI.cpp has the capability of running at a less that $0.01 cost on AWS Lamda
+### Steps
+1. With AWS account go to: Lambda -> Functions -> Create Function
+2. Choose a function name and select Containter image
+3. Use the following container image URI:
+   
+            851725497249.dkr.ecr.us-east-2.amazonaws.com/tnt_test@sha256:7b856c1e10d19d90a878f4d51de59748127b7046121c91bad02b9a7686189060
+4. Keep all other confugurations as default and select Create function
+5. Once the function is created update Configurations
+   - -> Configuration -> General configuration -> Increase Memory, Ephemeral storage, and Timeout as needed
+   - -> Permissions -> select Role Name link -> policies -> select S3 full access -> actions -> attach to function
+6. Back in your created function update -> Test - Event Json to:
+
+        {
+          "s3_bucket": "cnpi-input-bucket",
+          "s3_key": ["Input Reference.bed (WGS_sorted_filtered.bed)","Input QuicKmer2.bed.gz (NA12878_sorted_filtered.bed.gz)","Name of output bucket (cnpi-bucket)"],
+          "arguments":{
+            "d": "Input Reference.bed (WGS_sorted_filtered.bed)",
+            "g": "Input QuicKmer2.bed.gz (NA12878_sorted_filtered.bed.gz)",
+            "o": "choose output label for files: /tmp/name (/tmp/NA12878)",
+            "n": "40101",
+            "c": "2295745",
+            "r": "",
+            "t": "",
+            "s": "",
+            "l": "",
+            "u": "",
+            "h": "",
+            "w": ""}
+        }
+
 
 # Example Pictures
 
