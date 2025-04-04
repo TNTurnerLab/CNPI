@@ -11,6 +11,8 @@
 #include <thread>
 #include <sstream>
 #include <cstring>
+#include <filesystem>
+
 
 
 // Function to round a number to a specified number of decimal places
@@ -33,9 +35,11 @@ static struct option long_options[] = {
     {"chromosome", required_argument, NULL, 'e'},
     {"start_stop", required_argument, NULL, 'p'},
     {"cn_rows", required_argument, NULL, 'c'},
+    {"duplication", required_argument, NULL, 'u'},
+    {"deletion", required_argument, NULL, 'l'},
+    {"weighted", required_argument, NULL, 'w'},
     {0, 0, 0, 0}
 };
-
 
 //finds the karyotype across regions within the bed file
 //used the genotype file as input
@@ -116,12 +120,17 @@ bool start_stop, int start, int end, std::string return_chromosome, std::string*
 
 
 //find regions of the bed file that have standard deviations above a certain value
-void count_sd(float score_check, std::string output_name, int bed_path_rows, std::string **genotype_table_output , std::string **stats_tabs_table){
+void count_sd(float score_check, std::string output_name, int bed_path_rows, std::string **genotype_table_output , std::string **stats_tabs_table, bool output_provide, std::string filename){
 
     std::cout<< "\n\nSD Count Abnormalities:"; 
     std::string file;
 
-    file = output_name +"_SD_Abnormality_Output.txt";
+    if(output_provide){
+        file = output_name + "_SD_Abnormality_Output.txt";
+    }else{
+        file = filename + "_SD_Abnormality_Output.txt";
+    }
+
     
     std::ofstream f(file);
 
@@ -151,14 +160,19 @@ void count_sd(float score_check, std::string output_name, int bed_path_rows, std
 
 
 //find count abnormalities if the average of the region is above or below 2 or 1 by a selected value
-void count_abnormalities(std::string **genotype_table_output, float score_check, std::string output_name, int bed_path_rows, std::string **stats_tabs_table){
+void count_abnormalities(std::string **genotype_table_output, float score_check, std::string output_name, int bed_path_rows, std::string **stats_tabs_table, bool output_provide, std::string filename){
     
     std::cout<< "\n\nAverage Count Abnormalities:";
 
     //write it to a file
     std::string file;
 
-    file = output_name +"_Abnormality_Output.txt";
+    if(output_provide){
+        file = output_name + "_Abnormality_Output.txt";
+    }else{
+        file = filename + "_Abnormality_Output.txt";
+    }
+    
     
     std::ofstream f(file);
 
@@ -227,7 +241,7 @@ double get_standard_dev(std::vector<double> &stdnums, float average){
 }
 
 void gz_stats(int &duplicated_autosome, std::string &type, int cn_rows, int unique_headers, std::string* cn_header_table, float **cn_float_tabs_table, std::string gz_path,
-std::string output_name, bool chr, bool start_stop, int start, int end, std::string return_chromosome, std::string* headers, int* high_table, int* low_table){
+std::string output_name, bool chr, bool start_stop, int start, int end, std::string return_chromosome, std::string* headers, int* high_table, int* low_table, bool output_provide, std::string filename){
 
     
     //std::string headers[unique_headers];
@@ -377,9 +391,13 @@ std::string output_name, bool chr, bool start_stop, int start, int end, std::str
         }
     }    
     std::string file;
-    
-    file = output_name + "_Karyotype.txt";
 
+    if(output_provide){
+        file = output_name + "_Karyotype.txt";
+    }else{
+        file = filename + "_Karyotype.txt";
+    }
+    
     type = label;
 
     std::ofstream f(file);
@@ -421,6 +439,10 @@ std::string output_name, bool chr, bool start_stop, int start, int end, std::str
 
 int main(int argc, char *argv[]){
 
+    std::cout << "\n\t\t\t--------------------------------------------------------------------"
+    << "\n\t\t\t| Welcome to the Copy Number Private Investigator (CNPI) Program!! |"
+    <<"\n\t\t\t--------------------------------------------------------------------\n\n";
+
     //initilazation of arguments
     std::string gz_path;    // Declare string for gz_path outside the if block
     int bed_path_rows = 0;  // Initialize bed_path_rows outside the if block
@@ -428,15 +450,18 @@ int main(int argc, char *argv[]){
     std::string return_record;  // Returns a specific record to terminal if provided
     std::string return_chromosome; // Returns a specific chromosome to screen if provided
     std::string bed_gz_path;    // for reference bed file. Function can open .bed and .bed.gz
-    bool record =false, abnormalities =false, sd =false, start_stop=false, chr =false, run_0 =false, bed_provide =false, cn_fill=false;
+    bool record =false, abnormalities =false, sd =false, start_stop=false, chr =false, run_0 =false, bed_provide =false, cn_fill=false, output_provide=false, weighted=false;
     float score_check =0, sd_check =0;
     int start =0, end =999999999; //for start and stop locations of a chromosome if provided
     int cn_rows =0;
 
+    float del = 1.3;
+    float dup = 2.7;
+
 
     //arguments short names and argument manager
    int opt;
-    while ((opt = getopt_long_only(argc, argv, "g:n:o:d:s:t:e:p:r:c:h", long_options, NULL)) != -1) {
+    while ((opt = getopt_long_only(argc, argv, "g:n:o:d:s:t:e:p:r:c:u:l:wxh", long_options, NULL)) != -1) {
         switch (opt) {
             case 'g':
                 gz_path = optarg;
@@ -447,6 +472,7 @@ int main(int argc, char *argv[]){
                 break;
             case 'o':
                 output_name = optarg;
+                output_provide = true;
                 break;
             case 'r':
                 record =true;
@@ -463,6 +489,14 @@ int main(int argc, char *argv[]){
                 sd=true;
                 sd_check = std::stof(optarg);
                 break;
+            case 'u':
+                dup = std::stof(optarg);
+                std::cout << "\nThe Duplication Threshold is: "<< dup;
+                break;
+            case 'l':
+                del = std::stof(optarg);
+                std::cout << "\nThe Deletion Threshold is: "<< del;
+                break;
             case 'e':
                 chr = true;
                 return_chromosome = optarg;
@@ -470,6 +504,9 @@ int main(int argc, char *argv[]){
             case 'c':
                 cn_fill = true;
                 cn_rows = std::stoi(optarg);
+            case 'w':
+                weighted = true;
+                break;
             case 'p':
                 // First argument after -s is the start location
                 start = atoi(optarg);
@@ -481,29 +518,45 @@ int main(int argc, char *argv[]){
                 }
                 break;
             case 'h':
-                std::cout<< "\nThis program is designed to read through .gz files containing count number information at specific windows and matching these windows up with region locations of a ref_seq file." 
-                << " RefSeq_Curated.bed file was taken from NCBI with useful information being region name, chromosome, and start and stop information. Relevant information from the .gz file included chromosome, start and stop location of windows, and count number for each window."
-                << " Information that will be recorded into an ouptut file will be the following:\nRegion|\tChromosome|\tStart|\tStop|\tCN_Average|\tCN_SD|\tRegion_Size|\tTotal_Windows"
+                std::cout<< "\nThis program is designed to produce copy number estimates at user specified regions. Matching copy number estimate windows with region locations of a Reference file and providing summary information for Reference File regions." 
+                << " Reference files containing chromosome, start and stop, and region information. Relevant information from the Quickmer CN Estimate file included chromosome, start and stop location of windows, and copy number for each window."
+                << " Information that will be recorded into an ouptut file will be the following:\n\nChromosome|\tStart|\tStop|\tRegion|\tCN_Average|\tWeighted_Avg|\tCN_SD|\tCN_CV|\tRegion_Size|\tTotal_Windows|\tGen_Variation"
+                << "\n\nChromosome:\t\tReferring to the chromosome a specific reference region comes from"
+                << "\nStart and Stop:\t\tReferring to the start and stop regions withing a chromosome that a regions comes from"
+                << "\nRegions:\t\tThe reference region that is being characterized. For example a Gene, Exon, or a Promoter"
+                << "\nCN_Average:\t\tThe Average of all the QuicKmer-2 Windows that overlap with a reference region"
+                << "\nWeighted_Average:\tThe weighted average of the QuicKmer-2 windows that overlap with a reference region. The size of each window is taken into account"
+                << "\nCN_SD:\t\t\tThe standard deviation of all the windows that overlap with a reference region"
+                << "\nCN_CV:\t\t\tThe coefficient of variation of all the widows that overlap with a reference region"
+                << "\nRegion_Size:\t\tIn base pairs the size of a reference region"
+                << "\nTotal_Windows:\t\tThe amount of QuicKmer-2 windows that overlap with a reference region"
+                << "\nGen_Variation:\t\tGenetic Variation of a reference region. Possible options being Reference, Deletion, Duplication, Trisomy, NA (Y chromosome reading in females)"
                 << "\n\nUsage:"
-                << "\n-d or -bed_gz_path : .bed or .bed.gz file with records to match cn windows up against: <RefSeq_Curated.bed> required!\t\t\t\t\t\t-r RefSeq_Curated_6_18_24.bed"
-                << "\n-g or -gz_path : .bed.gz or .bed file containing cn windows: <identifier.qm2.CN.1k.bed.gz> required!\t\t\t\t\t\t\t\t-g HG00700.qm2.CN.1k.bed.gz"
-                << "\n-n or -bed_path_rows <number of lines in bed_path_rows> Optional!\t\t\t\t\t\t\t\t\t\t\t\t-n 101172"
-                << "\nIf -n provided: Useful when running through many .gz files at once. Only will need to read through the .bed file to determine its size a single time. (BedPathRows.cpp program determines this)"
+                << "\n-d or -bed_gz_path : .bed or .bed.gz file with regions to match cn windows up against (also know as the reference file). Without file header: <RefSeq_Curated.bed> required!\t-d RefSeq_Curated_6_18_24.bed"
+                << "\n\t\tShould include the following: Chromosome, Start, Stop, and a region label"
+                << "\n-g or -gz_path : .bed.gz or .bed file containing CN windows. Without file header: <identifier.qm2.CN.1k.bed.gz> required!\t\t\t\t\t\t\t-g HG00700.qm2.CN.1k.bed.gz"
+                << "\n\t\tShould include the following: Chromosome, Start, Stop, and Copy Number Estimate"
+                << "\n-n or -bed_path_rows <number of lines in bed_path_rows> Optional!\t\t\t\t\t\t\t\t\t\t\t\t\t\t-n 101172"
+                << "\nIf -n provided: Parsing of the reference file is faster"
+                << "\n-c or -cn_rows: For inputting the amount of QuicK-mer2 rows into the program. Optional!\t\t\t\t\t\t\t\t\t\t\t\t-c 2300000"
+                << "\nIf -c provided: Parsing of the QuicKmer-2 file is faster"
                 << "\n-o or -output_name <preferred name of outputfile> optional!"
-                << "\nIf -o provided: output file will be the following: <preferred name of output-file>identifier.txt.\t\t\t\t\t\t\t\t-o pizza: pizza_HG00700.txt"
-                << "\nIf -o not provided: output file will be the following: Scanning_1_read_Output<identifier.qm2.CN.1k.bed.gz>.txt\tScanning_1_read_OutputHG00700.qm2.CN.1k.bed.gz.txt"
-                << "\n-r or -record returning a specific record from the refseq file to the terminal. Not Required\t\t\t\t\t\t\t\t\t-b NR_024321.1"
-                << "\n-s or -average_check: Will Execut Count Abnormalities function. Input a count abnormality threshold value to check each record with\t\t\t\t-s .1"
-                << "\n-t or -sd_check: Will Execute the Standard Deviation Abnormalities function. Input a standard deviation abnormality threshold to check each record with\t\t-b .3"
-                << "\n-e or -chromosome: For displaying a certain chromosome to the screen.\t\t\t\t\t\t-e chr7"
-                << "\n-p or -start_stop: For displaying a certain range within a chromosome. Need to input -e or -chromosome to run\t\t\t-p 10000 1000000 (input -e chr)"
-                << "\n-c or -cn_rows: For inputting the amount of QuicK-mer2 rows into the program"
+                << "\nIf -o provided: output file will be the following: <preferred name of output-file>identifier.txt.\t\t\t\t\t\t\t\t\t\t-o pizza.txt"
+                << "\nIf -o not provided: output file will be the following: Scanning_1_read_Output<identifier.qm2.CN.1k.bed.gz>.txt\tScanning_1_read_Outputpizza.qm2.CN.1k.bed.gz.txt"
+                << "\n-r or -record returning a specific region from the refseq file to the terminal. Not Required\t\t\t\t\t\t\t\t\t\t\t-r NR_024321.1"
+                << "\n-s or -average_check: Will Execute Count Abnormalities function. Input a count abnormality threshold value to check each record with\t\t\t\t\t\t-s .1"
+                << "\n-t or -sd_check: Will Execute the Standard Deviation Abnormalities function. Input a standard deviation abnormality threshold to check each record with\t\t\t\t-t .3"
+                << "\n-e or -chromosome: For displaying a certain chromosome to the screen.\t\t\t\t\t\t\t\t\t\t\t\t\t\t-e chr7"
+                << "\n-p or -start_stop: For displaying a certain range within a chromosome. Need to input -e or -chromosome to run\t\t\t\t\t\t\t\t\t-p 10000 1000000 (input -e chr)"
+                << "\n-w or -weighted: Using weighted average for Gen_Variation"
+                << "\n-l or -deletion: Customizable threshold for deletion value. Default is 1.3"
+                << "\n-u or -duplication: Custimizable threshold for duplication value. Default is 2.7"
                 << "\n\n";
                 return 0; 
         }
     }
 
-
+    
     std::cout << "\n____________________________________________________________________________________________________"
     "\n____________________________________________________________________________________________________";
     std::cout << "\n\nThe files are " << bed_gz_path << " and " << gz_path;
@@ -636,14 +689,14 @@ int main(int argc, char *argv[]){
     //end setting up bed ncbi table rows and initilizations
     
     //populating the refseq table
-    int tabs =0, gz_bed_rows=0; //tabs and rows when reading file
+    int tabs =0, gz_bed_rows=0, gz_gff3_rows; //tabs and rows when reading file
     int unique_headers =1;  //for finding amount of headers. At least 1 unique header
     
     while ((byte_read = gzread(gz_bed_table, buff, sizeof(buff))) > 0) {
         for (int i = 0; i < byte_read; ++i) {
             if(buff[i] == '\t') {
                 tabs +=1;       //tab increased so put information at next tab
-                   
+                
             }else if(buff[i]=='\n'){
                 if(gz_bed_rows>1 &&(bed_tabs_table[gz_bed_rows][0] != bed_tabs_table[gz_bed_rows-1][0])){
                         unique_headers +=1;     //found additional unique header from reference bed file
@@ -655,18 +708,19 @@ int main(int argc, char *argv[]){
             }
         }
     }
-
+    
     //populating cn header and cn float table. Useful for math
     for(int i =0; i<cn_rows; i++){
         cn_header_table[i]=cn_tabs_table[i][0];
         cn_float_tabs_table[i][0] = std::stof(cn_tabs_table[i][1]);
         cn_float_tabs_table[i][1] = std::stof(cn_tabs_table[i][2]);
         cn_float_tabs_table[i][2] = std::stof(cn_tabs_table[i][3]);
-        if(i<bed_path_rows){    //populating ncbi header and floats tables
-            ncbi_header_table[i]=bed_tabs_table[i][0];
-            ncbi_float_table[i][0] = std::stof(bed_tabs_table[i][1]);
-            ncbi_float_table[i][1] = std::stof(bed_tabs_table[i][2]);
-        }
+    }
+    for(int i=0; i<bed_path_rows; i++){
+           //populating ncbi header and floats tables
+        ncbi_header_table[i]=bed_tabs_table[i][0];
+        ncbi_float_table[i][0] = std::stof(bed_tabs_table[i][1]);
+        ncbi_float_table[i][1] = std::stof(bed_tabs_table[i][2]);
     }
 
     delete[] cn_tabs_table;
@@ -917,15 +971,29 @@ int main(int argc, char *argv[]){
     std::string headers[cn_unique_headers];
     int high_table[cn_unique_headers]; //highest cn value
     int low_table[cn_unique_headers];  //lowest cn value
+
+
+    std::string file;
+    std::string filename;
+
+    if(output_provide==false){
+        std::filesystem::path s(gz_path);
+        filename = s.filename().string();
+    }
+
     gz_stats(duplicated_autosome ,type, cn_rows, cn_unique_headers, cn_header_table, cn_float_tabs_table, gz_path, output_name,
-    chr, start_stop, start, end, return_chromosome, headers, high_table, low_table);
+    chr, start_stop, start, end, return_chromosome, headers, high_table, low_table, output_provide, filename);
 
     delete[] cn_header_table;
     delete[] cn_float_tabs_table;
 
 
-    std::string file;
-    file = output_name + "_Chromosomal_Sex.txt";
+    if(output_provide){
+        file = output_name + "_Chromosomal_Sex.txt";
+    }else{
+        file = filename + "_Chromosomal_Sex.txt";
+    }
+    //file = output_name + "_Chromosomal_Sex.txt";
     std::ofstream s(file);
     std::cout<< "\n\nThe Chromosomal Sex is: "<< type;
     if(s.is_open()){
@@ -940,8 +1008,12 @@ int main(int argc, char *argv[]){
     
     //open file and record the stats information
     //std::string file;
-    
-    file = output_name + "_Genotype.txt";
+    if(output_provide){
+        file = output_name + "_Genotype.txt";
+    }else{
+        file = filename + "_Genotype.txt";
+    }
+
     
     std::ofstream f(file);
     f << std::fixed << std::setprecision(3);
@@ -1002,84 +1074,95 @@ int main(int argc, char *argv[]){
                 }f<< "\t";
             }
 
-            //following if loop is for including genetic variation and includes more loops for special cases    
+            //double del = 1.3;
+            //double dup = 2.7;
+            
+            //following if loop is for including genetic variation and includes more loops for special cases
+            float cn_avg = std::stof(stats_tabs_table[i][4]);
+            float weighted_avg = std::stof(genotype_table_output[i][8]);
+            
+            float threshold = cn_avg;
+            if(weighted==true){
+                threshold = weighted_avg;
+            }
+
             if(stats_tabs_table[i][1]=="chrX"){
                 if(type=="XX" or type=="XXY" or type=="XXYY"){
-                    if(std::stof(stats_tabs_table[i][4])<1.3){
+                    if(threshold<del){
                         f <<"DELETION";
                         genotype_table_output[i][10] = "DELETION";
-                    }else if(std::stof(stats_tabs_table[i][4])>1.3 && std::stof(stats_tabs_table[i][4])<2.7){
+                    }else if(threshold>del && threshold<dup){
                         f <<"REFERENCE";
                         genotype_table_output[i][10] = "REFERENCE";
-                    }else if(std::stof(stats_tabs_table[i][4])>2.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>dup){
                         f <<"DUPLICATION";
                         genotype_table_output[i][10] = "DUPLICATION";
                     }
                 }else if(type=="XY" or type=="X"){
-                    if(std::stof(stats_tabs_table[i][4])<0.3){
+                    if(std::stof(stats_tabs_table[i][4])<(del-1)){
                         f <<"DELETION";
                         genotype_table_output[i][10] = "DELETION";
-                    }else if(std::stof(stats_tabs_table[i][4])>0.3 && std::stof(stats_tabs_table[i][4])<1.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>(del-1) && std::stof(stats_tabs_table[i][4])<(dup-1)){
                         f <<"REFERENCE";
                         genotype_table_output[i][10] = "REFERENCE";
-                    }else if(std::stof(stats_tabs_table[i][4])>1.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>(dup-1)){
                         f <<"DUPLICATION";
                         genotype_table_output[i][10] = "DUPLICATION";
                     }
                 }else if(type=="X"){
-                    if(std::stof(stats_tabs_table[i][4])<0.3){
+                    if(std::stof(stats_tabs_table[i][4])<(del-1)){
                         f <<"DELETION";
                         genotype_table_output[i][10] = "DELETION";
-                    }else if(std::stof(stats_tabs_table[i][4])>0.3 && std::stof(stats_tabs_table[i][4])<1.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>(del-1) && std::stof(stats_tabs_table[i][4])<(dup-1)){
                         f <<"REFERENCE";
                         genotype_table_output[i][10] = "REFERENCE";
-                    }else if(std::stof(stats_tabs_table[i][4])>1.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>(dup-1)){
                         f <<"DUPLICATION";
                         genotype_table_output[i][10] = "DUPLICATION";
                     }
                 }else if(type=="XXX" or type=="XXXY"){
-                    if(std::stof(stats_tabs_table[i][4])<2.3){
+                    if(std::stof(stats_tabs_table[i][4])<(del+1)){
                         f <<"DELETION";
                         genotype_table_output[i][10] = "DELETION";
-                    }else if(std::stof(stats_tabs_table[i][4])>2.3 && std::stof(stats_tabs_table[i][4])<3.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>(del+1) && std::stof(stats_tabs_table[i][4])<(dup+1)){
                         f <<"REFERENCE";
                         genotype_table_output[i][10] = "REFERENCE";
-                    }else if(std::stof(stats_tabs_table[i][4])>3.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>(dup+1)){
                         f <<"DUPLICATION";
                         genotype_table_output[i][10] = "DUPLICATION";
                      }
                 }else if(type=="XXXX" or type=="XXXXY"){
-                    if(std::stof(stats_tabs_table[i][4])<3.3){
+                    if(std::stof(stats_tabs_table[i][4])<(del+2)){
                         f <<"DELETION";
                         genotype_table_output[i][10] = "DELETION";
-                    }else if(std::stof(stats_tabs_table[i][4])>3.3 && std::stof(stats_tabs_table[i][4])<4.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>(del+2) && std::stof(stats_tabs_table[i][4])<(dup+2)){
                         f <<"REFERENCE";
                         genotype_table_output[i][10] = "REFERENCE";
-                    }else if(std::stof(stats_tabs_table[i][4])>4.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>(dup+2)){
                         f <<"DUPLICATION";
                         genotype_table_output[i][10] = "DUPLICATION";
                      }
                 }
             }else if(stats_tabs_table[i][1]=="chrY"){
                 if(type=="XY" or type=="XXY" or type=="XXXY" or type=="XXXXY" or type=="XXXXXY"){
-                    if(std::stof(stats_tabs_table[i][4])<0.3){
+                    if(std::stof(stats_tabs_table[i][4])<(del-1)){
                         f <<"DELETION";
                         genotype_table_output[i][10] = "DELETION";
-                    }else if(std::stof(stats_tabs_table[i][4])>0.3 && std::stof(stats_tabs_table[i][4])<1.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>(del-1) && std::stof(stats_tabs_table[i][4])<(dup-1)){
                         f <<"REFERENCE";
                         genotype_table_output[i][10] = "REFERENCE";
-                    }else if(std::stof(stats_tabs_table[i][4])>1.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>(dup+1)){
                         f <<"DUPLICATION";
                         genotype_table_output[i][10] = "DUPLICATION";
                     }
                 }else if(type=="XYY"){
-                    if(std::stof(stats_tabs_table[i][4])<1.3){
+                    if(std::stof(stats_tabs_table[i][4])<del){
                         f <<"DELETION";
                         genotype_table_output[i][10] = "DELETION";
-                    }else if(std::stof(stats_tabs_table[i][4])>1.3 && std::stof(stats_tabs_table[i][4])<2.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>del && std::stof(stats_tabs_table[i][4])<dup){
                         f <<"REFERENCE";
                         genotype_table_output[i][10] = "REFERENCE";
-                    }else if(std::stof(stats_tabs_table[i][4])>2.7){
+                    }else if(std::stof(stats_tabs_table[i][4])>dup){
                         f <<"DUPLICATION";
                         genotype_table_output[i][10] = "DUPLICATION";
                     }
@@ -1087,10 +1170,10 @@ int main(int argc, char *argv[]){
                     f<< "NA";
                 }
             }else if(stats_tabs_table[i][1]== "chr"+std::to_string(duplicated_autosome)){
-                if(std::stof(stats_tabs_table[i][4])<2.3){
+                if(std::stof(stats_tabs_table[i][4])<(del+1)){
                     f <<"DELETION";
                     genotype_table_output[i][10] = "DELETION";
-                }else if(std::stof(stats_tabs_table[i][4])>2.3 && std::stof(stats_tabs_table[i][4])<3.7){
+                }else if(std::stof(stats_tabs_table[i][4])>(del+1) && std::stof(stats_tabs_table[i][4])<(dup+1)){
                     f <<"TRISOMY";
                     genotype_table_output[i][10] = "TRISOMY";
                 }else{
@@ -1098,10 +1181,10 @@ int main(int argc, char *argv[]){
                     genotype_table_output[i][10] = "DUPLICATION";
                 }
             }else{
-                if(std::stof(stats_tabs_table[i][4])<1.3){
+                if(threshold<del){
                     f <<"DELETION";
                     genotype_table_output[i][10] = "DELETION";
-                }else if(std::stof(stats_tabs_table[i][4])>1.3 && std::stof(stats_tabs_table[i][4])<2.7){
+                }else if(threshold>del && threshold<dup){
                     f <<"REFERENCE";
                     genotype_table_output[i][10] = "REFERENCE";
                 }else{
@@ -1131,12 +1214,12 @@ int main(int argc, char *argv[]){
 
     //average abnormalities function
     if(abnormalities){
-        count_abnormalities(genotype_table_output , score_check, output_name, bed_path_rows, stats_tabs_table);
+        count_abnormalities(genotype_table_output , score_check, output_name, bed_path_rows, stats_tabs_table, output_provide, filename);
     }
 
     //standard deviation abnormalities function
     if(sd){
-        count_sd(sd_check, output_name, bed_path_rows, genotype_table_output, stats_tabs_table);
+        count_sd(sd_check, output_name, bed_path_rows, genotype_table_output, stats_tabs_table, output_provide, filename);
     }
     
     //regions function
