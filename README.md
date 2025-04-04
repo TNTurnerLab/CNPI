@@ -67,7 +67,7 @@ Any Tab Delimited File in this format will work as long as the first 4 columns a
       
    - For Sorting and filtering .bed files
      
-    grep -E '^(chr[1-9][0-9]*|chrX|chrY)\b' File.bed | sort -k1,1V -k2,2n > sorted_filtered.bed.gz
+    grep -E '^(chr[1-9][0-9]*|chrX|chrY)\b' File.bed | sort -k1,1V -k2,2n > sorted_filtered.bed
      
    - For Sorting and filtering .bed.gz files
 
