@@ -85,22 +85,25 @@ This program is designed to read through .gz files containing count number infor
 |----------|:-----------:|:----:|:-----:|:---------:|:-----------:|:-----:|:------:|:------------:|:--------------:|:------------:|
 
 ## Compile and Run Commands:   
-    g++ -std=c++11 CNPI.cpp -o CNPI -lz  
+    g++ -std=c++20 CNPI.cpp -o CNPI -lz  
     ./CNPI -d {region.bed} -g {quickmer2.gz} 
 ### As a single command:
-    g++ -std=c++11 CNPI.cpp -o CNPI -lz && time ./CNPI -d {sorted_annotated_region.bed} -g {quickmer2.gz file} -n {number_of_reference_regions} -o {output_file_names}
+    g++ -std=c++20 CNPI.cpp -o CNPI -lz && time ./CNPI -d {sorted_annotated_region.bed} -g {quickmer2.gz file} -n {number_of_reference_regions} -o {output_file_names}
 
 ## Options   
     -d or -bed_gz_path: .bed or .bed.gz file with regions to match copy number windows up against - Required!  
-    -g or -gz_path: .bed or .bed.gz file wih regions containing cn windows (quickmer2 output) - Required!  
-    -n or -bed_path_rows: number of reference file - Optional  
+    -g or -gz_path: .bed or .bed.gz file with regions containing cn windows (quickmer2 output) - Required!  
+    -n or -bed_path_rows: number of rows in reference file - Optional  
     -c or -cn_rows: number of rows in quickmer2 file - Optional 
     -o or -output_name: preferred name of output file  
     -r or -record: returning a record from reference file to the terminal - Optional  
     -s of -average_check: Will Execute Count Abnormalities function. Input a number and all regions that are greater than the number from the expected Copy number will be saved to a file  
     -b of -sd_abnormalities: Will Execute Standard Deviation Abnormalities function. Input a number and all regions having a greater standard deviation greater than it will be saved to a file  
     -e or -chromosome: For displaying a certain chromosome to the terminal  
-    -p or -start_stop; For displaying a certain range withing a chromosome to the terminal. Also need to input -e or -chromosome to run  
+    -p or -start_stop; For displaying a certain range withing a chromosome to the terminal. Also need to input -e or -chromosome to run
+    -w or -weighted: Using weighted average for Gen_Variation
+    -l or -deletion: Customizable threshold for deletion value. Default is 1.3
+    -u or -duplication: Custimizable threshold for duplication value. Default is 2.7
 
 <div align="center">
 
