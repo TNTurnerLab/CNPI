@@ -206,11 +206,11 @@ Use sort and filter commands to get rid of unnecessary lines
 CNPI.cpp has the capability of running for less than $0.01 per sample on AWS Lamda
 ### Steps
 1. With AWS account go to: Lambda -> Functions -> Create Function
-2. Choose a function name and select Containter image
+2. Choose a function name and select Container image
 3. Use the following container image URI:
    
             851725497249.dkr.ecr.us-east-2.amazonaws.com/tnt_test@sha256:7b856c1e10d19d90a878f4d51de59748127b7046121c91bad02b9a7686189060
-4. Keep all other confugurations as default and select Create function
+4. Keep all other configurations as default and select Create function
 5. Once the function is created update Configurations
    - -> Configuration -> General configuration -> Increase Memory, Ephemeral storage, and Timeout as needed
    - -> Permissions -> select Role Name link -> policies -> select AmazonS3FullAccess -> actions -> attach to function
