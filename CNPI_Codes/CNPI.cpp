@@ -37,7 +37,8 @@ static struct option long_options[] = {
     {"cn_rows", required_argument, NULL, 'c'},
     {"duplication", required_argument, NULL, 'u'},
     {"deletion", required_argument, NULL, 'l'},
-    {"weighted", required_argument, NULL, 'w'},
+    {"weighted", no_argument, NULL, 'w'},
+    {"pseudo", no_argument, NULL, 'm'},
     {0, 0, 0, 0}
 };
 
@@ -450,18 +451,18 @@ int main(int argc, char *argv[]){
     std::string return_record;  // Returns a specific record to terminal if provided
     std::string return_chromosome; // Returns a specific chromosome to screen if provided
     std::string bed_gz_path;    // for reference bed file. Function can open .bed and .bed.gz
-    bool record =false, abnormalities =false, sd =false, start_stop=false, chr =false, run_0 =false, bed_provide =false, cn_fill=false, output_provide=false, weighted=false;
+    bool record =false, abnormalities =false, sd =false, start_stop=false, chr =false, run_0 =false, bed_provide =false, cn_fill=false, output_provide=false, weighted=false, pseudo=false;
     float score_check =0, sd_check =0;
     int start =0, end =999999999; //for start and stop locations of a chromosome if provided
     int cn_rows =0;
 
-    float del = 1.3;
-    float dup = 2.7;
+    float del = 1.5;
+    float dup = 2.5;
 
 
     //arguments short names and argument manager
    int opt;
-    while ((opt = getopt_long_only(argc, argv, "g:n:o:d:s:t:e:p:r:c:u:l:wxh", long_options, NULL)) != -1) {
+    while ((opt = getopt_long_only(argc, argv, "g:n:o:d:s:t:e:p:r:c:u:l:mwh", long_options, NULL)) != -1) {
         switch (opt) {
             case 'g':
                 gz_path = optarg;
@@ -507,6 +508,9 @@ int main(int argc, char *argv[]){
             case 'w':
                 weighted = true;
                 break;
+            case 'm':
+                pseudo = true;
+                break;
             case 'p':
                 // First argument after -s is the start location
                 start = atoi(optarg);
@@ -549,8 +553,9 @@ int main(int argc, char *argv[]){
                 << "\n-e or -chromosome: For displaying a certain chromosome to the screen.\t\t\t\t\t\t\t\t\t\t\t\t\t\t-e chr7"
                 << "\n-p or -start_stop: For displaying a certain range within a chromosome. Need to input -e or -chromosome to run\t\t\t\t\t\t\t\t\t-p 10000 1000000 (input -e chr)"
                 << "\n-w or -weighted: Using weighted average for Gen_Variation"
-                << "\n-l or -deletion: Customizable threshold for deletion value. Default is 1.3"
-                << "\n-u or -duplication: Custimizable threshold for duplication value. Default is 2.7"
+                << "\n-l or -deletion: Customizable threshold for deletion value. Default is 1.5"
+                << "\n-u or -duplication: Custimizable threshold for duplication value. Default is 2.5"
+                << "\n-m or -pseudo: Labeling pseudoautosomal regions based on build hg38 in Genotype output. Default: unlabeled regions"
                 << "\n\n";
                 return 0; 
         }
@@ -1043,7 +1048,7 @@ int main(int argc, char *argv[]){
                 }
 
                 //labeling pseudoautosomal regions of chrX and chrY with special character *
-                if(j==1 and(stats_tabs_table[i][1]=="chrX" or stats_tabs_table[i][1]=="chrY")){
+                if(j==1 and(stats_tabs_table[i][1]=="chrX" or stats_tabs_table[i][1]=="chrY") and (pseudo==true)){
 
                     A = std::stoi(stats_tabs_table[i][2]);
                     B = std::stoi(stats_tabs_table[i][3]);
