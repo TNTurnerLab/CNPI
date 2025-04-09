@@ -99,7 +99,6 @@ int main(int argc, char *argv[]){
             if (buff[i] != '\n') {
                 lines += buff[i];
             }else{
-                //std::cout << "\n"<< lines;
                 lines.clear(); // Clear the line for the next iteration
                 region_file_rows +=1; //rows in reference file
             }
@@ -279,12 +278,10 @@ int main(int argc, char *argv[]){
             //std::cout<< "\n";
             if(bed_tabs_table[i][2]=="NA"){
                 for(int j=0; j<4; j++){
-                    //std::cout<<bed_tabs_table[i][j] <<"\t";
                     n<<bed_tabs_table[i][j] <<"\t";
                 }n<<"\n";
             }else{
                 for(int j=0; j<4; j++){
-                    //std::cout<<bed_tabs_table[i][j] <<"\t";
                     f<<bed_tabs_table[i][j] <<"\t";
                 }f<<"\n";
             }
