@@ -55,11 +55,15 @@ def Creating_Percentiles_Gene_Data_Function(args):
 
     genotype_file = args.reference
     condition = args.condition
+    qmer = args.qmer_windows
 
     print(f'The name of the reference file: {genotype_file}')
 
-    
-    gene_df = pd.read_csv(genotype_file, delimiter="\t", index_col=0)
+    # Read the genotype data
+    if qmer is not None:
+        gene_df = pd.read_csv(genotype_file, delimiter=",", index_col=[0,1,2])
+    else:
+        gene_df = pd.read_csv(genotype_file, delimiter="\t", index_col=0)
 
     print(gene_df)
 
@@ -201,23 +205,24 @@ def main():
 
     #creating gene and chromosome breakdowns. Basis of all these functions
     dist_parser = subparsers.add_parser('Create_Scoring', help='Creating Gene and Chromosome based scoring from _Genotype.txt files.')
-    dist_parser.add_argument('-d', '--distribution_percentiles', type=str, required=True, help='Distribution Percentiles File created from the CreatingGenePercentiles function')
-    dist_parser.add_argument('-t', '--testing_data', type=str, required=True, help='Genotype.txt file to create ICNS score for')
-    dist_parser.add_argument('-o','--output', type=str, required=False, help='For giving output files a specific name')
-    dist_parser.add_argument('-m','--males',type=str, required=False, help='For providing correct scoring for male X and Y chromosomes')
-    dist_parser.add_argument('-f','--females',type=str, required=False, help='For skipping the Y chromosome when creating an ICNS score for a female')
-    dist_parser.add_argument('-l','--deletion', type=float, default=1.5, help='Deletion cutoff value for scoring. Default is 1.5')
-    dist_parser.add_argument('-u','--duplication', type=float, default=2.5, help='Duplication cutoff value for scoring. Default is 2.5')
+    dist_parser.add_argument('-d', '--distribution_percentiles', type=str, required=True, help='Distribution Percentiles')
+    dist_parser.add_argument('-t', '--testing_data', type=str, required=True, help='testing_data')
+    dist_parser.add_argument('-o','--output', type=str, required=False, help='output_name')
+    dist_parser.add_argument('-m','--males',type=str, required=False, help='Sex')
+    dist_parser.add_argument('-f','--females',type=str, required=False, help='Sex')
+    dist_parser.add_argument('-l','--deletion', type=float, default=1.5, help='Deletion Value')
+    dist_parser.add_argument('-u','--duplication', type=float, default=2.5, help='Duplication Value')
 
     #creating percentile.txt Arg Parser
     dist_parser = subparsers.add_parser('CreatingGenePercentiles', help='Finding Percentiles of a population')
-    dist_parser.add_argument('-g', '--reference', type=str, required=True, help='Matrix of CN average data for creating CN percentiles')
-    dist_parser.add_argument('-c', '--condition', type=str, required=True, help='For naming CN percentile file')
+    dist_parser.add_argument('-g', '--reference', type=str, required=True, help='Genotype.txt file')
+    dist_parser.add_argument('-c', '--condition', type=str, required=True, help='Name of condition of percentile.txt file')
+    dist_parser.add_argument('-q', '--qmer_windows', type=str, required=False, help='Parsing Qmer Data Matrix')
 
     #creating CN Gene Matrix Arg Parser
     dist_parser = subparsers.add_parser('CN_GeneMatrix', help='Creating CN gene matrix for all individuals in a population')
-    dist_parser.add_argument('-g', '--reference', type=str, required=True, help='Genotype.txt file to be fed into a Copy Number Average Matrix')
-    dist_parser.add_argument('-c', '--condition', type=str, required=True, help='Naming CN matrix')
+    dist_parser.add_argument('-g', '--reference', type=str, required=True, help='Genotype.txt file')
+    dist_parser.add_argument('-c', '--condition', type=str, required=True, help='Name of condition of percentile.txt file')
 
     
     args = parser.parse_args()
@@ -226,6 +231,9 @@ def main():
     if args.function == 'Create_Scoring':
 
         #finding the gene and chromosome scores based upon a genotype.txt file
+        '''ran as:
+        python3 ICNS_Functions.py Create_Scoring -t 1kg_genomes_and_cnpi_output/NA12878_Genotype.txt -d Percentile_Data/Percentile_data.1_99.9_parents/Percentile_Data_.1_99.9_females.txt -o hi
+        '''
 
         Distribution_Scores_and_Cutoff_Y(args)
         print("Ran the Distribution Scores and Cutoff Function")
@@ -235,12 +243,20 @@ def main():
 
         #creating percentile files using gene matrix and input
 
+        '''ran as:
+        python3 ICNS_Functions.py CreatingGenePercentiles -g Percentile_Data/gene_distribution_filtered_male_parents.csv -c male_parents
+        '''
+
         Creating_Percentiles_Gene_Data_Function(args)
 
 
     if args.function == 'CN_GeneMatrix':
 
         #creating the gene matrix that will be used by the CreatingGenePercentiles function
+
+        '''rans as:
+        python3 ICNS_Functions.py CN_GeneMatrix -g 1kg_genomes_and_cnpi_output/NA12878_Genotype.txt -c males_filtered_parents
+        '''
 
         CN_Gene_Matrix_Function(args)
 
