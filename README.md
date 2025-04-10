@@ -83,12 +83,12 @@ Any Tab Delimited File in this format will work as long as the first 4 columns a
          
    - Sorted and Filtered GFF3, GTF, and VCF files still need to be parsed with the Parsing.cpp program
 
-    g++ -std=c++11 Parsing.cpp -o parsing -lz && ./parsing [-c] [-g] [v] [m]
+    g++ -std=c++11 Parsing.cpp -o parsing -lz && ./parsing [-c] [-g] [-v] [-m]
 
     -c: Indicates that file is a QuicK-mer2 or Bed File
     -g: Indicates that file is a GTF or GFF3 file
     -v: Indicates that file is a VCF file
-    -m: If included the following label is added to chromosomes in parsed VCF output: chr
+    -m: If included the following label is added to chromosomes in parsed VCF output: chr (-v is also required)
     
    Chromosomal sex is based off of possibly XY combinations. Where if X is only present sex is female and when a Y is present sex is male  
 
