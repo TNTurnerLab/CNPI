@@ -12,14 +12,16 @@ from matplotlib.collections import LineCollection
 
 
 
-def go_plot(combined_data, kary_array, parent1_type, parent2_type, gstats, gstat_array, select_chrm, skip, parent_len, start_pos, stop_pos, outputs, output, basename, prefix):
+def go_plot(combined_data, kary_array, parent1_type, parent2_type, gstats, gstat_array, select_chrm, skip, parent_len, start_pos, stop_pos, outputs, output, del_cn, dup_cn):
 
     print("The combined data is")
-    print(combined_data)
+
+
+    plt.rcParams["font.family"] = "Arial"
+    plt.rcParams['font.size'] = 16
     
     # Convert kary_array to Pandas DataFrame
     df = pd.DataFrame(combined_data, columns=['Chr', 'Lowest_Start_Pos', 'Highest_End_Pos', 'CN'])
-    print(df)
     last_row = df.iloc[-1]
 
     if(skip):
@@ -120,23 +122,23 @@ def go_plot(combined_data, kary_array, parent1_type, parent2_type, gstats, gstat
 
 
     print(kary_array[0][0])
-    print(select_chrm[3:])
+    print(f'The Chromosome is {select_chrm[3:]}')
     if ((kary_array[0][0] == "46,XY" or kary_array[0][0] == "47,XXY" or kary_array[0][0] == "47,XY+9" or kary_array[0][0] == "47,XY+21" or kary_array[0][0] == "47,XY+15" or
     kary_array[0][0] == "47,XY+14" or kary_array[0][0] == "47,XY+12" or kary_array[0][0] == "47,XY+13" or kary_array[0][0] == "47,XY+18" or kary_array[0][0] == "48,XXXY") and select_chrm[3:] == "Y"):
         ax1.axhline(y=1, color='black', linestyle='-', linewidth=2, label='CN=1')
-        ax1.axhline(y=1.7, color='r', linestyle='--', linewidth=2, label='CN=1.7')
-        ax1.axhline(y=.3, color='r', linestyle='--', linewidth=2, label='CN=0.3')
+        ax1.axhline(y=dup_cn-1, color='r', linestyle='--', linewidth=2, label=f'CN={dup_cn-1}')
+        ax1.axhline(y=del_cn-1, color='r', linestyle='--', linewidth=2, label=f'CN={del_cn-1}')
     elif((kary_array[0][0]=="46,XY" or kary_array[0][0] == "47,XXY" or kary_array[0][0] == "47,XY+9" or kary_array[0][0] == "47,XY+21" or kary_array[0][0] == "47,XY+15" or
     kary_array[0][0] == "47,XY+14" or kary_array[0][0] == "47,XY+12" or kary_array[0][0] == "47,XY+13" or kary_array[0][0] == "47,XY+18") and select_chrm[3:]=="X"):
         ax1.axhline(y=1, color='black', linestyle='-', linewidth=2, label='CN=1')
-        ax1.axhline(y=1.7, color='r', linestyle='--', linewidth=2, label='CN=1.7')
-        ax1.axhline(y=.3, color='r', linestyle='--', linewidth=2, label='CN=0.3')
+        ax1.axhline(y=dup_cn-1, color='r', linestyle='--', linewidth=2, label=f'CN={dup_cn-1}')
+        ax1.axhline(y=del_cn-1, color='r', linestyle='--', linewidth=2, label=f'CN={del_cn-1}')
     else:
          # Add horizontal lines
         ax1.axhline(y=2, color='black', linestyle='-', linewidth=2, label='CN=2')
-        ax1.axhline(y=2.7, color='r', linestyle='--', linewidth=2, label='CN=2.7')
-        ax1.axhline(y=1.3, color='r', linestyle='--', linewidth=2, label='CN=1.3')
-    
+        ax1.axhline(y=dup_cn, color='r', linestyle='--', linewidth=2, label=f'CN={dup_cn}')
+        ax1.axhline(y=del_cn, color='r', linestyle='--', linewidth=2, label=f'CN={del_cn}')
+   
     # Add vertical lines at each data point
     for pos in df['Lowest_Start_Pos']:
         ax1.plot([pos, pos], [-0.3, 0.0], color='gray', linestyle='-', linewidth=1)
@@ -145,20 +147,21 @@ def go_plot(combined_data, kary_array, parent1_type, parent2_type, gstats, gstat
     unique_rows = []
     go_label =0
     # Add solid bars underneath the graph
+
     if gstats:
         colors = ['purple', 'blue', 'green', 'red', 'orange', 'cyan', 'darkviolet', 'lavender', 'dodgerblue', 'salmon', 'silver', 'chocolate',
                   'yellow', 'slategray', 'hotpink', 'lime', 'mediumturquoise', 'moccasin', 'firebrick', 'gold', 'peru', 'darkseagreen', 'slategray']
         color_cycle = itertools.cycle(colors)
-        print("Gstats")
         for _, row in df.iterrows():
             for line in gstat_array:
                 if ((row[0] == line[0]) and 
-                    ((float(line[1]) <= row[1] and float(line[2]) >= row[2]) or
-                     (float(line[1]) >= row[1] and float(line[2]) <= row[2]) or
-                     (float(line[1]) >= row[1] and float(line[1]) <= row[2] and float(line[2]) >= row[2]) or
-                     (float(line[1]) <= row[1] and float(line[2]) >= row[1] and float(line[2]) <= row[2]))):
+                    ((float(line[1]) <= start_pos and float(line[2]) >= stop_pos) or
+                     (float(line[1]) >= start_pos and float(line[2]) <= stop_pos) or
+                     (float(line[1]) >= start_pos and float(line[1]) <= stop_pos and float(line[2]) >= stop_pos) or
+                     (float(line[1]) <= start_pos and float(line[2]) >= start_pos and float(line[2]) <= stop_pos))):
                     
                     labels.append((line))
+
                     go_label =1
 
                     # Get the next color from the cycle
@@ -168,8 +171,6 @@ def go_plot(combined_data, kary_array, parent1_type, parent2_type, gstats, gstat
                     lines = [[(float(line[1]), -0.1), (float(line[2]), -0.1)]]  # list of line segments
                     lc = LineCollection(lines, linewidths=12, colors=color)  # control linewidth here
                     ax1.add_collection(lc)
-                    
-
     if gstats:
         ax1.set_position([0.05, 0.1, 0.5, 0.8])
         ax2.set_position([0.65, 0, 0.25, 0.8])
@@ -205,17 +206,20 @@ def go_plot(combined_data, kary_array, parent1_type, parent2_type, gstats, gstat
         table_data = plot_df.values.tolist()
         col_labels = plot_df.columns.tolist()
         
-        ax2.text(0.5, 1.1, 'Region Information', ha='center', va='center', transform=ax2.transAxes, fontsize=18)
+        ax2.text(0.5, 1.1, 'Region Information', ha='center', va='center', transform=ax2.transAxes, fontsize=20)
 
         # Plot the table on the second subplot (ax2)
         ax2.axis('tight')
         ax2.axis('off')  # Hide axes
         table = ax2.table(cellText=table_data, colLabels=col_labels, loc='center', cellLoc='center')#, bbox=[-0.1,-0.1,1.3,1.2])
-        table.set_fontsize(18)
+        table.set_fontsize(20)
         table.auto_set_column_width([i for i in range(len(col_labels))])
-        num_rows = len(table_data) + 1  # Including header
-        row_height = 0.1  # Set a base row height (adjust as necessary)
-        table.scale(1, row_height * num_rows)
+
+        # Force cell height to fit font
+        for (row, col), cell in table.get_celld().items():
+            cell.set_height(0.05)  # Adjust as needed
+            cell.set_text_props(va='center', ha='center', wrap=True)
+        
         
         
     current_xlim = ax1.get_xlim()
@@ -226,10 +230,9 @@ def go_plot(combined_data, kary_array, parent1_type, parent2_type, gstats, gstat
 
     # Display the plot
     if outputs == False:
-        #filename = f"/Users/Jack/Documents/hello-docker/abnormal/abnormal_sorted/abnormal_pictures/{select_chrm}_{start_pos}-{stop_pos}.png"
-        filename = "Plot.png"
-    elif outputs == True and basename==True:
-        filename = output+"/"+prefix+"-"+select_chrm+"_"+str(start_pos)+"-"+str(stop_pos)+".png"
+        filename = select_chrm+"_"+str(start_pos)+"-"+str(stop_pos)+".png"
+    elif outputs == True:
+        filename = output+"-"+select_chrm+"_"+str(start_pos)+"-"+str(stop_pos)+".png"
     
 
     plt.savefig(filename)
@@ -239,9 +242,13 @@ def go_plot(combined_data, kary_array, parent1_type, parent2_type, gstats, gstat
     return 0
 
 
-def plot_function(consecutive_regions, df_combined,skip, case, gstats, gstat_array, unique_rows, parent1_type, parent2_type, parent_len, pre_array, post_array):
+def plot_function(consecutive_regions, df_combined,skip, case, gstats, gstat_array, unique_rows, parent1_type, parent2_type, parent_len, pre_array, post_array, del_cn, dup_cn):
     converted_array= []
     last =0
+
+    plt.rcParams["font.family"] = "Arial"
+    plt.rcParams['font.size'] = 13
+
     for row in consecutive_regions:
         columns = row.split('\t')
         converted_array.append(columns)
@@ -260,6 +267,7 @@ def plot_function(consecutive_regions, df_combined,skip, case, gstats, gstat_arr
 
 
     converted_array = converted_pre_array + converted_array + post_array
+    
 
     for row in converted_array:
         last = int(row[2])
@@ -310,37 +318,20 @@ def plot_function(consecutive_regions, df_combined,skip, case, gstats, gstat_arr
     plt.ylim(bottom=-0.35, top=highest_y+1)
 
     label1= 'CN=2'
-    label2= 'CN=2.7'
-    label3= 'CN=1.3'
+    label2= f'CN={dup_cn}'
+    label3= f'CN={del_cn}'
     y1 =  2
-    y2 = 2.7
-    y3 = 1.3
+    y2 = dup_cn
+    y3 = del_cn
     # Add horizontal lines
     if(case=="46,XY" and (converted_array[0][0] == "chrY" or converted_array[0][0] == "chrX")):
         label1 = 'CN=1'
-        label2 = 'CN=1.7'
-        label3 = 'CN=0.3'
+        label2 = f'CN={dup_cn-1}'
+        label3 = f'CN={del_cn-1}'
         y1 = 1
-        y2 = 1.7
-        y3 = .3
+        y2 = dup_cn-1
+        y3 = del_cn-1
 
-    '''
-    if ((kary_array[0][0] == "46,XY" or kary_array[0][0] == "47,XXY" or kary_array[0][0] == "47,XY+9" or kary_array[0][0] == "47,XY+21" or kary_array[0][0] == "47,XY+15" or
-    kary_array[0][0] == "47,XY+14" or kary_array[0][0] == "47,XY+12" or kary_array[0][0] == "47,XY+13" or kary_array[0][0] == "47,XY+18" or kary_array[0][0] == "48,XXXY") and select_chrm[3:] == "Y"):
-        ax1.axhline(y=1, color='black', linestyle='-', linewidth=2, label='CN=1')
-        ax1.axhline(y=1.7, color='r', linestyle='--', linewidth=2, label='CN=1.7')
-        ax1.axhline(y=.3, color='r', linestyle='--', linewidth=2, label='CN=0.3')
-    elif((kary_array[0][0]=="46,XY" or kary_array[0][0] == "47,XXY" or kary_array[0][0] == "47,XY+9" or kary_array[0][0] == "47,XY+21" or kary_array[0][0] == "47,XY+15" or
-    kary_array[0][0] == "47,XY+14" or kary_array[0][0] == "47,XY+12" or kary_array[0][0] == "47,XY+13" or kary_array[0][0] == "47,XY+18") and select_chrm[3:]=="X"):
-        ax1.axhline(y=1, color='black', linestyle='-', linewidth=2, label='CN=1')
-        ax1.axhline(y=1.7, color='r', linestyle='--', linewidth=2, label='CN=1.7')
-        ax1.axhline(y=.3, color='r', linestyle='--', linewidth=2, label='CN=0.3')
-    else:
-         # Add horizontal lines
-        ax1.axhline(y=2, color='black', linestyle='-', linewidth=2, label='CN=2')
-        ax1.axhline(y=2.7, color='r', linestyle='--', linewidth=2, label='CN=2.7')
-        ax1.axhline(y=1.3, color='r', linestyle='--', linewidth=2, label='CN=1.3')
-    '''
 
     plt.axhline(y=y1, color='black', linestyle='-', linewidth=2, label=label1)
     plt.axhline(y=y2, color='r', linestyle='--', linewidth=2, label=label2)
@@ -358,7 +349,6 @@ def plot_function(consecutive_regions, df_combined,skip, case, gstats, gstat_arr
         colors = ['purple', 'blue', 'green', 'red', 'orange', 'cyan', 'darkviolet', 'lavender', 'dodgerblue', 'salmon', 'silver', 'chocolate',
                   'yellow', 'slategray', 'hotpink', 'lime', 'mediumturquoise', 'moccasin', 'firebrick', 'gold', 'peru', 'darkseagreen', 'slategray']
         color_cycle = itertools.cycle(colors)
-        print("Gstats")
         for row in converted_array:
             line_break = 0
             for line in gstat_array:
@@ -403,18 +393,32 @@ def plot_function(consecutive_regions, df_combined,skip, case, gstats, gstat_arr
 def main():
     ##plotting time
 
-    parser = argparse.ArgumentParser(description='Process files specified by command line arguments.')
-    parser.add_argument('-f', '--file', type=str, required=True, help='Path to the file to process: Required')
-    parser.add_argument('-p', '--pair', nargs="*", type=str, required=False, metavar=('file1', 'file2'), help='Two separate files: Optional: 2 files must be provided')
+    parser = argparse.ArgumentParser(description=('''\
+    CNPI Plotting:
+    Creating figures based on quickmer copy number data.
+    
+    Plotting can output abnormal copy number ranges outside of the 1.5-2.5 threshold. A default amount of 60 regions is used.
+    The user can specify amount of quickmer windows to include within each ababnormal Copy Number range.
+    A default buffer of 3 is used.
+    Amount of windows in a row falling withing normal range before being abnormal again. Helpful for copy number oscilations.
+    
+    Plotting is also for plotting user specified copy number ranges. For plotting entire chomosomes or regions withing a chromosome.
+    
+    Can include Genotype Statistics produced from CNPI.cpp to complement copy number images.
+    '''))
+    parser.add_argument('-f', '--file', type=str, required=True, help="Required: An Individual's Quickmer Copy Number Data File: Required")
+    parser.add_argument('-p', '--pair', nargs="*", type=str, required=False, metavar=('file1', 'file2'), help='Optional: For Plotting Duos and Trios. One or Two separate files: Files need to be the same length when plotting a trios. Use sort and filter commands to get rid of unnecessary lines')
     parser.add_argument('-r', '--reference', type=str, required=True, help='Path to the reference file: Required')
-    parser.add_argument('-w', '--minWindow', type=str, required=False, default=60,help='<Min Window size to be observed: Optional: Default 60')
-    parser.add_argument('-i', '--windowBuffer', type=str, required=False, default=3, help='Amount of times window can violate 1.3-2.7 rule: Optional: Default 3')
-    parser.add_argument('-se', '--selectChrm', type=str, required=False, help='Chromosome to pick: Optional')
-    parser.add_argument('-start', '--startPos', type=str, required=False, help='Start Position: Optional')
-    parser.add_argument('-stop', '--stopPos', type=str, required=False, help='Stop Position: Optional')
-    parser.add_argument('-gstat', '--gstat_txt', type=str, required=False, help='Genome_Stats.txt: Optional for transcropt statistics')
-    parser.add_argument('-o','--output', type=str, required=False, help='Input File output')
-    parser.add_argument('-b','--basename',type=str,required=False,help='basname')
+    parser.add_argument('-w', '--minWindow', type=str, required=False, default=60,help='<Min Window size of of abnormal copy number regions: Optional: Default 60')
+    parser.add_argument('-i', '--windowBuffer', type=str, required=False, default=3, help='Amount of windows that can fall within normal range when plotting abnormal copy number ranges 1.5-2.5 rule: Optional: Default 3')
+    parser.add_argument('-se', '--selectChrm', type=str, required=False, help='Chromosome to plot. For user specificed copy number images: Optional')
+    parser.add_argument('-start', '--startPos', type=str, required=False, help='Start Position of user specified range. Must also include Chromosome to plot: Optional')
+    parser.add_argument('-stop', '--stopPos', type=str, required=False, help='Stop Position of user specified range. Must also include chromosome to plot: Optional')
+    parser.add_argument('-gstat', '--gstat_txt', type=str, required=False, help='For complementing plots with Genotype_Stats.txt: Optional for seeing region statistics')
+    parser.add_argument('-o','--output', type=str, required=False, help='Output Image Label')
+    parser.add_argument('-min','--minimum', type=float, required=False, default=1.5, help='Output Image Label')
+    parser.add_argument('-max','--maximum', type=float, required=False, default=2.5, help='Output Image Label')
+    #parser.add_argument('-b','--basename',type=str,required=False,help='basname')
 
 
 
@@ -428,8 +432,7 @@ def main():
     parent_len =0
     outputs = False
     output = ""
-    basename = ""
-    prefix = ""
+    
 
     if args.pair is not None and (len(args.pair) == 2 or len(args.pair) ==1):
         if (len(args.pair)==2):
@@ -447,9 +450,6 @@ def main():
         outputs = True
         output=args.output
 
-    if args.basename is not None:
-        basename = True
-        prefix = args.basename
 
     if args.selectChrm is not None:
         pickChrm=True
@@ -466,6 +466,11 @@ def main():
     if args.gstat_txt is not None:
         gstats=True
         gstat_path = args.gstat_txt
+
+    del_cn = args.minimum
+
+    dup_cn = args.maximum
+    print(f'The duplication cn is {dup_cn} and the deletion cn is {del_cn}')
 
         
     # Access the file paths provided
@@ -540,6 +545,35 @@ def main():
                 fields = line.strip().split('\t')
                 gstat_array.append(fields)
 
+    
+    combined_data_sex = {
+        'Chr': [row[0] for row in gz_array],
+        'Lowest_Start_Pos': [int(row[1]) for row in gz_array],
+        'Highest_End_Pos': [int(row[2]) for row in gz_array],
+        'CN': [float(row[3]) for row in gz_array],
+    }
+
+    if(skip and (parent_len==2)):
+        combined_data_sex2 = {
+            'Parent1_Chr': [row[0] for row in gz_parent1_array],
+            'Parent1_Lowest_Start_Pos': [int(row[1]) for row in gz_parent1_array],
+            'Parent1_Highest_End_Pos': [int(row[2]) for row in gz_parent1_array],
+            'Parent1_CN': [float(row[3]) for row in gz_parent1_array],
+            'Parent2_Chr': [row[0] for row in gz_parent2_array],
+            'Parent2_Lowest_Start_Pos': [int(row[1]) for row in gz_parent2_array],
+            'Parent2_Highest_End_Pos': [int(row[2]) for row in gz_parent2_array],
+            'Parent2_CN': [float(row[3]) for row in gz_parent2_array],
+        }
+        combined_data_sex.update(combined_data_sex2)
+
+    if(skip and (parent_len==1)):
+        combined_data_sex2 = {
+            'Parent1_Chr': [row[0] for row in gz_parent1_array],
+            'Parent1_Lowest_Start_Pos': [int(row[1]) for row in gz_parent1_array],
+            'Parent1_Highest_End_Pos': [int(row[2]) for row in gz_parent1_array],
+            'Parent1_CN': [float(row[3]) for row in gz_parent1_array],
+        }
+        combined_data_sex.update(combined_data_sex2)
 
     if(pickChrm):
         gz_array = [row for row in gz_array if row[0] == select_chrm]
@@ -567,6 +601,8 @@ def main():
         'Highest_End_Pos': [int(row[2]) for row in gz_array],
         'CN': [float(row[3]) for row in gz_array],
     }
+
+
     if(skip and (parent_len==2)):
         combined_data2 = {
             'Parent1_Chr': [row[0] for row in gz_parent1_array],
@@ -591,10 +627,12 @@ def main():
 
     # Create a DataFrame for combined data
     df_combined = pd.DataFrame(combined_data)
-
+    df_combined_sex = pd.DataFrame(combined_data_sex)
+    
+    
     parent1_type = "Parent 1"
     parent2_type = "Parent 2"
-    if(skip):
+    if(skip and pickChrm is None and tryStart is None and tryStop is None):
         average_cn1 = df_combined[df_combined['Parent1_Chr'] == 'chrY']['Parent1_CN'].mean()
         if average_cn1<.7:
             parent1_type = "Mother"
@@ -610,12 +648,28 @@ def main():
             else:
                 parent2_type = "Father"
                 print(f'{gz_parent2} is the Father')
-        print(average_cn1)
+        
+
+    if(skip is not None and pickChrm is not None and tryStart is not None and tryStop is not None):
+        average_cn1 = df_combined_sex[df_combined_sex['Parent1_Chr'] == 'chrY']['Parent1_CN'].mean()
+        if average_cn1<.7:
+            parent1_type = "Mother"
+            print(f'{gz_parent1} is the Mother')
+        else:
+            parent1_type = "Father"
+            print(f'{gz_parent1} is the Father')
         if parent_len !=1:
-            print(average_cn2)
+            average_cn2 = df_combined_sex[df_combined_sex['Parent2_Chr'] == 'chrY']['Parent2_CN'].mean()
+            if average_cn1>.7:
+                parent2_type = "Mother"
+                print(f'{gz_parent2} is the Mother')
+            else:
+                parent2_type = "Father"
+                print(f'{gz_parent2} is the Father')
+        
 
     if (pickChrm):
-        go_plot(df_combined, kary_array, parent1_type, parent2_type, gstats, gstat_array, select_chrm, skip, parent_len, start_pos, stop_pos, outputs, output, basename, prefix)
+        go_plot(df_combined, kary_array, parent1_type, parent2_type, gstats, gstat_array, select_chrm, skip, parent_len, start_pos, stop_pos, outputs, output, del_cn, dup_cn)
 
     consecutive_count = 0
     consecutive_regions = []
@@ -640,10 +694,10 @@ def main():
                 pre_array.clear()
                 consecutive_count =0
                 consecutive_failures =0
-            elif(previous_row is not None and i>0):
-                pre_array.clear()
+            #elif(previous_row is not None and len(pre_array)>1):
+            #    pre_array.clear()
 
-            if (float(row[3]) > 2.7 or float(row[3]) < 1.3) and (row[0] != "chrX" and row[0] != "chrY"):
+            if (float(row[3]) > dup_cn or float(row[3]) < del_cn) and (row[0] != "chrX" and row[0] != "chrY"):
                 if (previous_row is not None and consecutive_failures >0 and consecutive_count !=0 and row[0]==previous_chrm):
                     consecutive_regions.append('\t'.join(previous_row))
                 if(row[0]==previous_chrm):
@@ -651,7 +705,7 @@ def main():
                     consecutive_failures =0
                     consecutive_regions.append('\t'.join(row))
 
-            elif ((kary_array[0][0] == "46,XY") and (float(row[3]) > 1.7 or float(row[3]) < 0.3)) and (row[0] == "chrX" or row[0] == "chrY"):
+            elif ((kary_array[0][0] == "46,XY") and (float(row[3]) > dup_cn-1 or float(row[3]) < del_cn-1)) and (row[0] == "chrX" or row[0] == "chrY"):
                 if (previous_row is not None and consecutive_failures >0 and consecutive_count !=0 and row[0]==previous_chrm):
                     consecutive_regions.append('\t'.join(previous_row))
                 if(row[0]==previous_chrm):
@@ -659,7 +713,7 @@ def main():
                     consecutive_failures=0
                     consecutive_regions.append('\t'.join(row))
 
-            elif ((kary_array[0][0] == "46,XX") and (float(row[3]) > 2.7 or float(row[3]) < 1.3)) and (row[0] == "chrX"):
+            elif ((kary_array[0][0] == "46,XX") and (float(row[3]) > dup_cn or float(row[3]) < del_cn)) and (row[0] == "chrX"):
                             if(previous_row is not None and consecutive_failures >0 and consecutive_count !=0 and row[0]==previous_chrm):
                                 consecutive_regions.append('\t'.join(previous_row))
                             if(row[0]==previous_chrm):
@@ -669,8 +723,11 @@ def main():
 
             else:
                 consecutive_failures +=1
+                pre_array.append('\t'.join(row))
                 if(row[0]==previous_chrm and stop==0):
-                    pre_array.append('\t'.join(row))
+                    #pre_array.append('\t'.join(row))
+                    #pre_array.append(row)
+
                     consecutive_regions.append('\t'.join(row))
                     stop=1
                 
@@ -685,10 +742,8 @@ def main():
                             b+=1
 
                         if(row[0]==previous_chrm):
-                            print(row[0])
-                            print(previous_row)
                             print(f'The consecutive count is {consecutive_count} the pass limit is {pass_limit} the consecuitive failures is {consecutive_failures} the fail limit is {fail_limit}')
-                            plot_function(consecutive_regions, df_combined, skip, kary_array[0][0], gstats, gstat_array, unique_rows, parent1_type, parent2_type, parent_len, pre_array, post_array)
+                            plot_function(consecutive_regions, df_combined, skip, kary_array[0][0], gstats, gstat_array, unique_rows, parent1_type, parent2_type, parent_len, pre_array, post_array, del_cn, dup_cn)
 
                         pre_array.clear()
                         post_array.clear()
@@ -709,7 +764,7 @@ def main():
             previous_row = row
             previous_chrm = row[0]
 
-    f.close()
+    f.close() 
 
     print(kary_array[0][0])
 
