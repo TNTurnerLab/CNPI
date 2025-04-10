@@ -72,7 +72,24 @@ Any Tab Delimited File in this format will work as long as the first 4 columns a
    - For Sorting and filtering .bed.gz files
 
     zgrep -E '^(chr[1-9][0-9]*|chrX|chrY)\b' File.bed.gz | sort -k1,1V -k2,2n | gzip > sorted_filtered.bed.gz
-     
+
+   - For Sorting and filtering GFF3/GTF files
+
+    gzcat Unsorted.gff3.gz | grep -v "#" | awk '$1 ~ /^(1?[0-9]|2[0-2]|X|Y)$/' | sort -k1,1V -k2,2n | gzip > GFF3_sorted_filtered.gz
+
+   - For Sorting and Filtering VCF files
+
+    cat file.vcf | grep -v "#" | grep -v "IMPRECISE"| grep -v "LowQual" | grep -Ev "MAPQ=[0-9]($|[^0-9])|MAPQ=1[0-9]($|[^0-9])" | awk '$1 ~ /^chr(1?[0-9]|2[0-2]|X|Y)$/' | sort -k1,1V -k2,2n > VCF_sorted_filtered.txt
+         
+   - Sorted and Filtered GFF3, GTF, and VCF files still need to be parsed with the Parsing.cpp program
+
+    g++ -std=c++11 Parsing.cpp -o parsing -lz && ./parsing [-c] [-g] [v] [m]
+
+    -c: Indicates that file is a QuicK-mer2 or Bed File
+    -g: Indicates that file is a GTF or GFF3 file
+    -v: Indicates that file is a VCF file
+    -m: If included the following label is added to chromosomes in parsed VCF output: chr
+    
    Chromosomal sex is based off of possibly XY combinations. Where if X is only present sex is female and when a Y is present sex is male  
 
 
