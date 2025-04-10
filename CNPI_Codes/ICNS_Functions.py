@@ -55,15 +55,11 @@ def Creating_Percentiles_Gene_Data_Function(args):
 
     genotype_file = args.reference
     condition = args.condition
-    qmer = args.qmer_windows
 
     print(f'The name of the reference file: {genotype_file}')
 
-    # Read the genotype data
-    if qmer is not None:
-        gene_df = pd.read_csv(genotype_file, delimiter=",", index_col=[0,1,2])
-    else:
-        gene_df = pd.read_csv(genotype_file, delimiter="\t", index_col=0)
+    
+    gene_df = pd.read_csv(genotype_file, delimiter="\t", index_col=0)
 
     print(gene_df)
 
@@ -100,7 +96,7 @@ def Creating_Percentiles_Gene_Data_Function(args):
     df.to_csv(percentile_data, sep="\t")
 
 
-def Distribution_Scores_and_Cutoff_Y(args):
+def Distribution_Scores(args):
 
     percentiles = args.distribution_percentiles
     testing_data = args.testing_data
@@ -111,10 +107,6 @@ def Distribution_Scores_and_Cutoff_Y(args):
     del_val = args.deletion
 
     chr_name = 'Chr'
-    if female_sex is not None:
-        sex = 'Female'
-    if male_sex is not None:
-        sex = 'Male'
 
     percentile_df = pd.read_csv(percentiles, sep="\t")
     testing_data_df = pd.read_csv(testing_data, sep="\t")
@@ -135,7 +127,12 @@ def Distribution_Scores_and_Cutoff_Y(args):
     chromosome_df['counts'] = 0
 
     for row_index in range(len(percentile_df)):
-        if ((percentile_df.iloc[row_index, percentile_df.columns.get_loc('region')] == testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('Region')]) 
+
+        if (female_sex is not None and testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] == "chrY"):
+            print(f"Skipping row for Y region: {testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('Region')]}")
+            continue
+
+        elif ((percentile_df.iloc[row_index, percentile_df.columns.get_loc('region')] == testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('Region')]) 
             and (percentile_df.iloc[row_index, percentile_df.columns.get_loc('.1 Percentile')] > testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')]) 
             and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')] < (del_val-1))
             and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] == "chrX" or testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)]=="chrY")
@@ -156,11 +153,10 @@ def Distribution_Scores_and_Cutoff_Y(args):
             for rows in range(len(chromosome_df)):
                 if chromosome_df.iloc[rows, chromosome_df.columns.get_loc('chromosomes')] == testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)]:
                     chromosome_df.iloc[rows, chromosome_df.columns.get_loc('counts')] += 1
-        
+
         elif ((percentile_df.iloc[row_index, percentile_df.columns.get_loc('region')] == testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('Region')]) 
             and (percentile_df.iloc[row_index, percentile_df.columns.get_loc('.1 Percentile')] > testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')])
             and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')] < del_val)):
-            '''and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] != "chrX" and testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)]!="chrY")):'''
             print(f"Under .1 Percentile for {percentile_df.iloc[row_index, percentile_df.columns.get_loc('region')]}. The CN was {testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')]}. The .1 Percentile is {percentile_df.iloc[row_index, percentile_df.columns.get_loc('.1 Percentile')]}")
             percentile_test_df.iloc[row_index, percentile_test_df.columns.get_loc('scores')] = 2
             for rows in range(len(chromosome_df)):
@@ -170,7 +166,6 @@ def Distribution_Scores_and_Cutoff_Y(args):
         elif ((percentile_df.iloc[row_index, percentile_df.columns.get_loc('region')] == testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('Region')]) 
             and (percentile_df.iloc[row_index, percentile_df.columns.get_loc('99.9 Percentile')] < testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')])
             and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')] > dup_val)):
-            '''and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] != "chrX" and testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)]!="chrY")):'''
             print(f"Over 99.9 Percentile for {percentile_df.iloc[row_index, percentile_df.columns.get_loc('region')]}. The CN was {testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')]}. The 99.9 Percentile is {percentile_df.iloc[row_index, percentile_df.columns.get_loc('99.9 Percentile')]}")
             percentile_test_df.iloc[row_index, percentile_test_df.columns.get_loc('scores')] = 1
             for rows in range(len(chromosome_df)):
@@ -200,29 +195,27 @@ def main():
 
     parser = argparse.ArgumentParser(description='Choose Function That you would like to perform')
 
-    subparsers = parser.add_subparsers(dest='function', help='Available subcommands'
-    '\n\nhello')
+    subparsers = parser.add_subparsers(dest='function', help='Available subcommands')
 
     #creating gene and chromosome breakdowns. Basis of all these functions
     dist_parser = subparsers.add_parser('Create_Scoring', help='Creating Gene and Chromosome based scoring from _Genotype.txt files.')
-    dist_parser.add_argument('-d', '--distribution_percentiles', type=str, required=True, help='Distribution Percentiles')
-    dist_parser.add_argument('-t', '--testing_data', type=str, required=True, help='testing_data')
-    dist_parser.add_argument('-o','--output', type=str, required=False, help='output_name')
-    dist_parser.add_argument('-m','--males',type=str, required=False, help='Sex')
-    dist_parser.add_argument('-f','--females',type=str, required=False, help='Sex')
-    dist_parser.add_argument('-l','--deletion', type=float, default=1.5, help='Deletion Value')
-    dist_parser.add_argument('-u','--duplication', type=float, default=2.5, help='Duplication Value')
+    dist_parser.add_argument('-d', '--distribution_percentiles', type=str, required=True, help='Distribution Percentiles File created from the CreatingGenePercentiles function')
+    dist_parser.add_argument('-t', '--testing_data', type=str, required=True, help='Genotype.txt file to create ICNS score for')
+    dist_parser.add_argument('-o','--output', type=str, required=False, help='For giving output files a specific name')
+    dist_parser.add_argument('-m','--males',type=str, action='store_true', help='For providing correct scoring for male X and Y chromosomes')
+    dist_parser.add_argument('-f','--females', action='store_true', required=False, help='For skipping the Y chromosome when creating an ICNS score for a female')
+    dist_parser.add_argument('-l','--deletion', type=float, default=1.5, help='Deletion cutoff value for scoring. Default is 1.5')
+    dist_parser.add_argument('-u','--duplication', type=float, default=2.5, help='Duplication cutoff value for scoring. Default is 2.5')
 
     #creating percentile.txt Arg Parser
     dist_parser = subparsers.add_parser('CreatingGenePercentiles', help='Finding Percentiles of a population')
-    dist_parser.add_argument('-g', '--reference', type=str, required=True, help='Genotype.txt file')
-    dist_parser.add_argument('-c', '--condition', type=str, required=True, help='Name of condition of percentile.txt file')
-    dist_parser.add_argument('-q', '--qmer_windows', type=str, required=False, help='Parsing Qmer Data Matrix')
+    dist_parser.add_argument('-g', '--reference', type=str, required=True, help='Matrix of CN average data for creating CN percentiles')
+    dist_parser.add_argument('-c', '--condition', type=str, required=True, help='For naming CN percentile file')
 
     #creating CN Gene Matrix Arg Parser
     dist_parser = subparsers.add_parser('CN_GeneMatrix', help='Creating CN gene matrix for all individuals in a population')
-    dist_parser.add_argument('-g', '--reference', type=str, required=True, help='Genotype.txt file')
-    dist_parser.add_argument('-c', '--condition', type=str, required=True, help='Name of condition of percentile.txt file')
+    dist_parser.add_argument('-g', '--reference', type=str, required=True, help='Genotype.txt file to be fed into a Copy Number Average Matrix')
+    dist_parser.add_argument('-c', '--condition', type=str, required=True, help='Naming CN matrix')
 
     
     args = parser.parse_args()
@@ -231,21 +224,14 @@ def main():
     if args.function == 'Create_Scoring':
 
         #finding the gene and chromosome scores based upon a genotype.txt file
-        '''ran as:
-        python3 ICNS_Functions.py Create_Scoring -t 1kg_genomes_and_cnpi_output/NA12878_Genotype.txt -d Percentile_Data/Percentile_data.1_99.9_parents/Percentile_Data_.1_99.9_females.txt -o hi
-        '''
 
-        Distribution_Scores_and_Cutoff_Y(args)
-        print("Ran the Distribution Scores and Cutoff Function")
+        Distribution_Scores(args)
+        print("Ran the Distribution Scores Function")
     
 
     if args.function == 'CreatingGenePercentiles':
 
         #creating percentile files using gene matrix and input
-
-        '''ran as:
-        python3 ICNS_Functions.py CreatingGenePercentiles -g Percentile_Data/gene_distribution_filtered_male_parents.csv -c male_parents
-        '''
 
         Creating_Percentiles_Gene_Data_Function(args)
 
@@ -253,10 +239,6 @@ def main():
     if args.function == 'CN_GeneMatrix':
 
         #creating the gene matrix that will be used by the CreatingGenePercentiles function
-
-        '''rans as:
-        python3 ICNS_Functions.py CN_GeneMatrix -g 1kg_genomes_and_cnpi_output/NA12878_Genotype.txt -c males_filtered_parents
-        '''
 
         CN_Gene_Matrix_Function(args)
 
