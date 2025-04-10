@@ -33,12 +33,12 @@ int main(int argc, char *argv[]){
 
     std::string region_file_path;    // for reference bed file. Function can open .bed and .bed.gz
     int region_file_rows =0;
-    bool cn_parse=false, vcf_parse=false, gfile_parse=false;
+    bool cn_parse=false, vcf_parse=false, gfile_parse=false, include_chrm=false;
 
 
     //arguments short names and argument manager
    int opt;
-    while ((opt = getopt_long_only(argc, argv, "c:g:v:h", long_options, NULL)) != -1) {
+    while ((opt = getopt_long_only(argc, argv, "c:g:v:mh", long_options, NULL)) != -1) {
         switch (opt) {
             case 'c':
                 region_file_path = optarg;
@@ -52,10 +52,14 @@ int main(int argc, char *argv[]){
                 region_file_path = optarg;
                 vcf_parse = true;
                 break;
+            case 'm':
+                include_chrm=true;
+                break;
             case 'h':
                 std::cout<< "\nTime to parse a file"
                 << "\n-g to parse a gff3 or gtf file"
                 << "\n-v to parse a VCF file"
+                << "\n-m Include chromosome labels if they are not within VCF file"
                 << "\n-c to parse a Bed File or a QuicK-mer2 file";
                 return 0; 
         }
@@ -257,7 +261,10 @@ int main(int argc, char *argv[]){
                             else if(buff[i]==';'){type_stop=true;}
                         }
                     }else if(tabs==0){
-                        if(prefix==true){/*bed_tabs_table[vcf_file_rows][0] = "chr"*/; prefix=false;}
+                        if(prefix==true){
+                            if(include_chrm==true){
+                                bed_tabs_table[vcf_file_rows][0] = "chr";}
+                            prefix=false;}
                         bed_tabs_table[vcf_file_rows][0] +=buff[i];
                     }
                 }
@@ -276,7 +283,9 @@ int main(int argc, char *argv[]){
 
         for(int i=0; i<region_file_rows; i++){
             //std::cout<< "\n";
-            if(bed_tabs_table[i][2]=="NA"){
+            std::string last3 = bed_tabs_table[i][3].substr(bed_tabs_table[i][3].length() - 3);
+    
+            if(bed_tabs_table[i][2]=="NA" || last3=="INV" || last3=="INS" || last3=="BND"){
                 for(int j=0; j<4; j++){
                     n<<bed_tabs_table[i][j] <<"\t";
                 }n<<"\n";
