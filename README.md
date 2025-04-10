@@ -193,6 +193,36 @@ Use sort and filter commands to get rid of unnecessary lines
   
     usage: CNPI_plotting.py -f FILE -r REFERENCE [-w MINWINDOW] [-i WINDOWBUFFER] [-se SELECTCHRM] [-start STARTPOS] [-stop STOPPOS] [-gstat GSTAT_TXT] [-p [file1 [file2]]] [-h]
 
+# Individual-level Copy Number Scores (ICNS scoring)
+
+Python program that scores individuals based on normal copy number percentile distributions.
+It assigns scores to regions within an individual's Genotype.txt file that show abnormally high or low copy number values. A score of 2 is given to regions significantly below the normal percentile range, while a score of 1 is given to regions significantly above it. The program provides both per-region and per-chromosome scoring breakdowns to help identify abnormal genomic areas and distinguish affected chromosomes.
+
+## Usage
+
+### Ran As:
+    python3 ICNS_Functions.py [Create_Scoring] or [CreatingGenePercentiles] or [CN_GeneMatrix]
+
+### Possible Commands:
+CN_GeneMatrix: Function for concatonation Copy Number Average Scores from Genotype.txt files that can later be used for making Percentile Values
+
+    -g reference: Genotype.txt file to be fed into Copy Number Average Matrix
+    -c condition: For naming CN Matrix
+
+CreatingGenePercentiles: Finding Percentiles of regions within Copy Number Matrix file
+
+    -g reference: Matrix of Copy Number average data for creating CN percentiles
+    -c condition: For naming CN percentile file
+
+Create_Scoring: Function that scores individuals based upon region Copy Number Percentile files.
+
+    -d distribution_percentiles: File created from the CreatingGenePercentiles function. Copy Number percentiles of regions
+    -t testing_data: Genotype.txt file to create ICNS score for based off of Copy Number Percentiles file
+    -o output: Providing a specific name for output files
+    -m males: Adjusting Scoring for males for X and Y chromosomes
+    -f females: Skipping scoring for Y chromosome in females
+    -l deletion: Deletion cutoff value for scoring. Default is 1.5
+    -u duplication: Duplication cutoff value for scoring. Default is 2.5
 
 ## Dockers
 
