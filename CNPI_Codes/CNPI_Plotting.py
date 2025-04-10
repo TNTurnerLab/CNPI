@@ -398,27 +398,25 @@ def main():
     Creating figures based on quickmer copy number data.
     
     Plotting can output abnormal copy number ranges outside of the 1.5-2.5 threshold. A default amount of 60 regions is used.
-    The user can specify amount of quickmer windows to include within each ababnormal Copy Number range.
-    A default buffer of 3 is used.
-    Amount of windows in a row falling withing normal range before being abnormal again. Helpful for copy number oscilations.
+    The user can specify amount of QuicK-mer2 windows to include within each abnormal Copy Number range.
+    A default buffer of 3 is used - Amount of windows in a row falling within normal range before being abnormal again. Helpful for copy number oscilations.
     
-    Plotting is also for plotting user specified copy number ranges. For plotting entire chomosomes or regions withing a chromosome.
+    Plotting is also for visualizing user specified copy number ranges. For plotting entire chomosomes or regions within a chromosome.
     
     Can include Genotype Statistics produced from CNPI.cpp to complement copy number images.
     '''))
     parser.add_argument('-f', '--file', type=str, required=True, help="Required: An Individual's Quickmer Copy Number Data File: Required")
     parser.add_argument('-p', '--pair', nargs="*", type=str, required=False, metavar=('file1', 'file2'), help='Optional: For Plotting Duos and Trios. One or Two separate files: Files need to be the same length when plotting a trios. Use sort and filter commands to get rid of unnecessary lines')
-    parser.add_argument('-r', '--reference', type=str, required=True, help='Path to the reference file: Required')
+    parser.add_argument('-r', '--reference', type=str, required=True, help='Background information regarding the sex of the individual: Found in the the Karyotype file: Required')
     parser.add_argument('-w', '--minWindow', type=str, required=False, default=60,help='<Min Window size of of abnormal copy number regions: Optional: Default 60')
     parser.add_argument('-i', '--windowBuffer', type=str, required=False, default=3, help='Amount of windows that can fall within normal range when plotting abnormal copy number ranges 1.5-2.5 rule: Optional: Default 3')
-    parser.add_argument('-se', '--selectChrm', type=str, required=False, help='Chromosome to plot. For user specificed copy number images: Optional')
+    parser.add_argument('-se', '--selectChrm', type=str, required=False, help='Chromosome to plot. For user specificed copy number images: Optional: start and stop positions required')
     parser.add_argument('-start', '--startPos', type=str, required=False, help='Start Position of user specified range. Must also include Chromosome to plot: Optional')
     parser.add_argument('-stop', '--stopPos', type=str, required=False, help='Stop Position of user specified range. Must also include chromosome to plot: Optional')
     parser.add_argument('-gstat', '--gstat_txt', type=str, required=False, help='For complementing plots with Genotype_Stats.txt: Optional for seeing region statistics')
-    parser.add_argument('-o','--output', type=str, required=False, help='Output Image Label')
-    parser.add_argument('-min','--minimum', type=float, required=False, default=1.5, help='Output Image Label')
-    parser.add_argument('-max','--maximum', type=float, required=False, default=2.5, help='Output Image Label')
-    #parser.add_argument('-b','--basename',type=str,required=False,help='basname')
+    parser.add_argument('-o','--output', type=str, required=False, help='Specifying Output Image Label')
+    parser.add_argument('-min','--minimum', type=float, required=False, default=1.5, help='For changing default minimum abnormal value (1.5 default)')
+    parser.add_argument('-max','--maximum', type=float, required=False, default=2.5, help='For changing default maximum abnormal value (2.5 default)')
 
 
 
@@ -650,7 +648,7 @@ def main():
                 print(f'{gz_parent2} is the Father')
         
 
-    if(skip is not None and pickChrm is not None and tryStart is not None and tryStop is not None):
+    if(skip is not None and pickChrm is not None and tryStart is not None and tryStop is not None and parent_len>0):
         average_cn1 = df_combined_sex[df_combined_sex['Parent1_Chr'] == 'chrY']['Parent1_CN'].mean()
         if average_cn1<.7:
             parent1_type = "Mother"
