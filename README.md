@@ -177,15 +177,18 @@ Use sort and filter commands to get rid of unnecessary lines
 ### Ran As:
     python3 CNPI_plotting.py -f sorted_filtered.bed.gz -r Karyotype.txt
 ### Possible Commands
-    -f File: The file of the child or patient that we are trying to plot  
-    -p file1 file2: Files containing information for the parents of the child. With 2 parents and a child we can plot trio or a duo  
-    -r Reference: background information regarding the chromosomes and sex of the child  
-    -W MINWINDOW: The minimum amount of windows that are consecutively outside of the 1.3 and 2.7 window. Outside of this range indicates an alteration from normal copy number  
-    -I WINDOWBUFFER: The Copy Number may oscillate around the 1.3 or 2.7 threshold and if it jumps within the okay region and then back out again this is a buffer of windows that can consecutively fall within the okay region before falling out again  
-    -se SELECTCHRM: If you want to visualize a particular chromosome you can indicate which here  
-    -start STARTPOS: If you want to plot a chromosome and specific start position  
-    -stop STOPPOS: If you want to plot a chromosome and specific stop position  
-    -gstat GSTAT_TXT: For including transcript regions on the visuals
+    -f File: Required: An Individual's Quickmer Copy Number Data File: Required  
+    -p file1 file2: For Plotting Duos and Trios. One or Two separate files: Files need to be the same length when plotting a trios. Use sort and filter commands to get rid of unnecessary lines  
+    -r Reference: Background information regarding the sex of the individual: Found in the the Karyotype file: Required  
+    -W MINWINDOW: The minimum amount of windows that are consecutively outside of the 1.5 and 2.5 window. Outside of this range indicates an alteration from normal copy number  
+    -I WINDOWBUFFER: The Copy Number may oscillate around the 1.5 or 2.5 threshold and if it jumps within the okay region and then back out again this is a buffer of windows that can consecutively fall within the okay region before falling out again  
+    -se SELECTCHRM: If you want to visualize a particular chromosome you can indicate which here: Optional: start and stop positions requred 
+    -start STARTPOS: Start Position of user specified range. Must also include Chromosome to plot: Optional 
+    -stop STOPPOS: Stop Position of user specified range. Must also include chromosome to plot: Optional  
+    -gstat GSTAT_TXT: For complementing plots with Genotype_Stats.txt: Optional for seeing region statistics
+    -o output: Specifying Output Image Label
+    -min minimum: For changing default minimum abnormal value (1.5 default)
+    -max --maximum: For changing default maximum abnormal value (2.5 default)
 
   
     usage: CNPI_plotting.py -f FILE -r REFERENCE [-w MINWINDOW] [-i WINDOWBUFFER] [-se SELECTCHRM] [-start STARTPOS] [-stop STOPPOS] [-gstat GSTAT_TXT] [-p [file1 [file2]]] [-h]
