@@ -270,11 +270,11 @@ CNPI.cpp has the capability of running for less than $0.01 per sample on AWS Lam
 
 # Example Pictures
 
-## Plotting of a Region Outside of Normal (1.3 - 2.7) Threshold
+## Plotting of a Region Outside of Normal (1.5 - 2.5) Threshold
 
  - Dash Lines at the bottom represent locations of quickmer window readings
  - Colored boxes within graph represent different genes corresponding to the genes within the table on the right
- - Red dash lines representing within normal copy number range (1.3 - 2.7)
+ - Red dash lines representing within normal copy number range (1.5 - 2.5)
  - The blue line in the middle at 2 representing a copy number value of 2
  - Plotted blue line throughout the graph representing the copy number across chromosome
 
@@ -288,7 +288,7 @@ CNPI.cpp has the capability of running for less than $0.01 per sample on AWS Lam
 
 ## Plotting Based off an Inputted Range
 
-- Red dash lines representing within normal copy number range (1.3 - 2.7)
+- Red dash lines representing within normal copy number range (1.5 - 2.5)
 - The blue line in the middle at 2 representing a copy number value of 2
 - Plotted blue line throughout the graph representing the copy number across inputted range
 
