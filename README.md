@@ -68,18 +68,25 @@ Any Tab Delimited File in this format will work as long as the first 4 columns a
    - For Sorting and filtering .bed files
      
     grep -E '^(chr[1-9][0-9]*|chrX|chrY)\b' File.bed | sort -k1,1V -k2,2n > sorted_filtered.bed
+    g++ -std=c++11 Parsing.cpp -o parsing -lz && ./parsing -c sorted_filtered.bed
      
    - For Sorting and filtering .bed.gz files
 
     zgrep -E '^(chr[1-9][0-9]*|chrX|chrY)\b' File.bed.gz | sort -k1,1V -k2,2n | gzip > sorted_filtered.bed.gz
+    g++ -std=c++11 Parsing.cpp -o parsing -lz && ./parsing -c sorted_filtered.bed.gz
+
 
    - For Sorting and filtering GFF3/GTF files
 
-    gzcat Unsorted.gff3.gz | grep -v "#" | awk '$1 ~ /^(1?[0-9]|2[0-2]|X|Y)$/' | sort -k1,1V -k2,2n | gzip > GFF3_sorted_filtered.gz
+    gzcat Unsorted.gff3(gtf).gz | grep -v "#" | awk '$1 ~ /^(1?[0-9]|2[0-2]|X|Y)$/' | sort -k1,1V -k2,2n | gzip > GFF3(GTF)_sorted_filtered.gz
+    g++ -std=c++11 Parsing.cpp -o parsing -lz && ./parsing -g GFF3(GTF)_sorted_filtered.bed.gz
+
 
    - For Sorting and Filtering VCF files
 
     cat file.vcf | grep -v "#" | grep -v "IMPRECISE"| grep -v "LowQual" | grep -Ev "MAPQ=[0-9]($|[^0-9])|MAPQ=1[0-9]($|[^0-9])" | awk '$1 ~ /^chr(1?[0-9]|2[0-2]|X|Y)$/' | sort -k1,1V -k2,2n > VCF_sorted_filtered.txt
+    g++ -std=c++11 Parsing.cpp -o parsing -lz && ./parsing -v VCF_sorted_filtered.txt [-m]
+
          
    - Sorted and Filtered GFF3, GTF, and VCF files still need to be parsed with the Parsing.cpp program
 
@@ -221,15 +228,19 @@ It assigns scores to regions within an individual's Genotype.txt file that show 
     python3 ICNS_Functions.py [Create_Scoring] or [CreatingGenePercentiles] or [CN_GeneMatrix]
 
 ### Possible Commands:
-CN_GeneMatrix: Function for concatonation Copy Number Average Scores from Genotype.txt files that can later be used for making Percentile Values
+CN_GeneMatrix: Function for concatonation Copy Number Average Scores from Genotype.txt files that can later be used for making Percentile Values. Function is to be ran in a loop with new reference Genotype.txt files being added to CN_GeneMatrix file with condition label
 
     -g reference: Genotype.txt file to be fed into Copy Number Average Matrix
     -c condition: For naming CN Matrix
+
+    python3 CN_GeneMatrix -g NA12878_Genes_Genotype.txt -c GeneCN_Matrix
 
 CreatingGenePercentiles: Finding Percentiles of regions within Copy Number Matrix file
 
     -g reference: Matrix of Copy Number average data for creating CN percentiles
     -c condition: For naming CN percentile file
+
+    python3 CreatingGenePercentiles -g gene_distribution_GeneCN_Matrix.csv (output from CN_GeneMatrix) -c gene_distributions
 
 Create_Scoring: Function that scores individuals based upon region Copy Number Percentile files.
 
@@ -240,6 +251,8 @@ Create_Scoring: Function that scores individuals based upon region Copy Number P
     -f females: Skipping scoring for Y chromosome in females
     -l deletion: Deletion cutoff value for scoring. Default is 1.5
     -u duplication: Duplication cutoff value for scoring. Default is 2.5
+
+    python3 Create_Scoring -d Percentile_Data_gene_distributions.txt (output from CreatingGenePercentiles) -t New_Genome_Genotype.txt -o New_Genome -m
 
 ## Dockers
 
