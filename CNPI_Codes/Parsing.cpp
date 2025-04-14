@@ -139,7 +139,6 @@ int main(int argc, char *argv[]){
                     tabs +=1;       //tab increased so put information at next tab   
                 }else if(buff[i]=='\n'){
                     if(cn_file_rows>1 &&(bed_tabs_table[cn_file_rows][0] != bed_tabs_table[cn_file_rows-1][0])){
-                            std::cout << "\n" << bed_tabs_table[cn_file_rows][0] << "\t" << bed_tabs_table[cn_file_rows-1][0];
                             unique_headers +=1;     //found additional unique header from reference bed file
                             chrms.push_back(bed_tabs_table[cn_file_rows][0]);
                             indexes.push_back(cn_file_rows);
