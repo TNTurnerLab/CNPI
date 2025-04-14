@@ -258,11 +258,11 @@ Create_Scoring: Function that scores individuals based upon region Copy Number P
 
 ### Linux
 
-    docker run -v "$(pwd):/app:ro" -it jackust/cn_docker:CNPI_Linux_V1.0 
+    docker run -v "$(pwd):/app:ro" -it jackust/cn_docker:CNPI_Linux_V2.0 
 
 ### Mac
 
-    docker run -v "$(pwd):/app:ro" -it jackust/cn_docker:CNPI_Mac_V1.0
+    docker run -v "$(pwd):/app:ro" -it jackust/cn_docker:CNPI_Mac_V2.0
 
 ## AWS Lambda
 
