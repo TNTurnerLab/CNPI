@@ -128,15 +128,16 @@ def Distribution_Scores(args):
 
     for row_index in range(len(percentile_df)):
 
-        if (female_sex is not None and testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] == "chrY"):
+        if (female_sex and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] == "chrY" or testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] == "chrY*")):
             print(f"Skipping row for Y region: {testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('Region')]}")
             continue
 
         elif ((percentile_df.iloc[row_index, percentile_df.columns.get_loc('region')] == testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('Region')]) 
             and (percentile_df.iloc[row_index, percentile_df.columns.get_loc('.1 Percentile')] > testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')]) 
             and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')] < (del_val-1))
-            and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] == "chrX" or testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)]=="chrY")
-            and male_sex is not None):
+            and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] == "chrX" or testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)]=="chrY" 
+                 or testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] == "chrX*" or testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)]=="chrY*")
+            and male_sex):
             print(f"Under .1 Percentile for {percentile_df.iloc[row_index, percentile_df.columns.get_loc('region')]}. The CN was {testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')]}. The .1 Percentile is {percentile_df.iloc[row_index, percentile_df.columns.get_loc('.1 Percentile')]}")
             percentile_test_df.iloc[row_index, percentile_test_df.columns.get_loc('scores')] = 2
             for rows in range(len(chromosome_df)):
@@ -146,8 +147,9 @@ def Distribution_Scores(args):
         elif ((percentile_df.iloc[row_index, percentile_df.columns.get_loc('region')] == testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('Region')]) 
             and (percentile_df.iloc[row_index, percentile_df.columns.get_loc('99.9 Percentile')] < testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')])
             and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')] > (dup_val-1))
-            and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] == "chrX" or testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)]=="chrY")
-            and male_sex is not None):
+            and (testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] == "chrX" or testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)]=="chrY"
+                 or testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)] == "chrX*" or testing_data_df.iloc[row_index, testing_data_df.columns.get_loc(chr_name)]=="chrY*")
+            and male_sex):
             print(f"Over 99.9 Percentile for {percentile_df.iloc[row_index, percentile_df.columns.get_loc('region')]}. The CN was {testing_data_df.iloc[row_index, testing_data_df.columns.get_loc('CN_Average')]}. The 99.9 Percentile is {percentile_df.iloc[row_index, percentile_df.columns.get_loc('99.9 Percentile')]}")
             percentile_test_df.iloc[row_index, percentile_test_df.columns.get_loc('scores')] = 1
             for rows in range(len(chromosome_df)):
@@ -202,7 +204,7 @@ def main():
     dist_parser.add_argument('-d', '--distribution_percentiles', type=str, required=True, help='Distribution Percentiles File created from the CreatingGenePercentiles function')
     dist_parser.add_argument('-t', '--testing_data', type=str, required=True, help='Genotype.txt file to create ICNS score for')
     dist_parser.add_argument('-o','--output', type=str, required=False, help='For giving output files a specific name')
-    dist_parser.add_argument('-m','--males',action='store_true', required=False, help='For providing correct scoring for male X and Y chromosomes')
+    dist_parser.add_argument('-m','--males', action='store_true', required=False, help='For providing correct scoring for male X and Y chromosomes')
     dist_parser.add_argument('-f','--females', action='store_true', required=False, help='For skipping the Y chromosome when creating an ICNS score for a female')
     dist_parser.add_argument('-l','--deletion', type=float, default=1.5, help='Deletion cutoff value for scoring. Default is 1.5')
     dist_parser.add_argument('-u','--duplication', type=float, default=2.5, help='Duplication cutoff value for scoring. Default is 2.5')
