@@ -202,7 +202,7 @@ def main():
     dist_parser.add_argument('-d', '--distribution_percentiles', type=str, required=True, help='Distribution Percentiles File created from the CreatingGenePercentiles function')
     dist_parser.add_argument('-t', '--testing_data', type=str, required=True, help='Genotype.txt file to create ICNS score for')
     dist_parser.add_argument('-o','--output', type=str, required=False, help='For giving output files a specific name')
-    dist_parser.add_argument('-m','--males',type=str, action='store_true', help='For providing correct scoring for male X and Y chromosomes')
+    dist_parser.add_argument('-m','--males',action='store_true', required=False, help='For providing correct scoring for male X and Y chromosomes')
     dist_parser.add_argument('-f','--females', action='store_true', required=False, help='For skipping the Y chromosome when creating an ICNS score for a female')
     dist_parser.add_argument('-l','--deletion', type=float, default=1.5, help='Deletion cutoff value for scoring. Default is 1.5')
     dist_parser.add_argument('-u','--duplication', type=float, default=2.5, help='Duplication cutoff value for scoring. Default is 2.5')
