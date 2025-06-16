@@ -20,6 +20,7 @@ static struct option long_options[] = {
     {"cn_path", required_argument, NULL, 'c'},
     {"g_path", required_argument, NULL, 'g'},
     {"vcf_path", required_argument, NULL, 'v'},
+    {"CNVnator_path", required_argument, NULL, 'n'},
     {"help", no_argument, NULL, 'h'},
     {0, 0, 0, 0}
 };
@@ -33,12 +34,12 @@ int main(int argc, char *argv[]){
 
     std::string region_file_path;    // for reference bed file. Function can open .bed and .bed.gz
     int region_file_rows =0;
-    bool cn_parse=false, vcf_parse=false, gfile_parse=false, include_chrm=false;
+    bool cn_parse=false, vcf_parse=false, gfile_parse=false, include_chrm=false, CNVnator_parse=false;
 
 
     //arguments short names and argument manager
    int opt;
-    while ((opt = getopt_long_only(argc, argv, "c:g:v:mh", long_options, NULL)) != -1) {
+    while ((opt = getopt_long_only(argc, argv, "c:g:v:n:mh", long_options, NULL)) != -1) {
         switch (opt) {
             case 'c':
                 region_file_path = optarg;
@@ -55,12 +56,17 @@ int main(int argc, char *argv[]){
             case 'm':
                 include_chrm=true;
                 break;
+            case 'n':
+                region_file_path = optarg;
+                CNVnator_parse = true;
+                break;
             case 'h':
                 std::cout<< "\nTime to parse a file"
                 << "\n-g to parse a gff3 or gtf file"
                 << "\n-v to parse a VCF file"
                 << "\n-m Include chromosome labels if they are not within VCF file"
-                << "\n-c to parse a Bed File or a QuicK-mer2 file";
+                << "\n-c to parse a Bed File or a QuicK-mer2 file"
+                << "\n-n to parse CNVnator output";
                 return 0; 
         }
     }
@@ -313,19 +319,17 @@ int main(int argc, char *argv[]){
         }std::cout<< "\n";
         i.close();
 
-    }else if(gfile_parse==true){
-        int tabs =0, gz_gff3_rows=0; //tabs and rows when reading file
+    }else if(CNVnator_parse==true){
+        int spaces =0, gz_gff3_rows=0; //tabs and rows when reading file
         int unique_headers =1;  //for finding amount of headers. At least 1 unique header
-        bool prefix = true;
+        bool prefix = true, colon=false, hyphen=false;
         std::vector<std::string> chrms;
         std::vector<int> indexes;
     
         while ((byte_read = gzread(gz_bed_table, buff, sizeof(buff))) > 0) {
             for (int i = 0; i < byte_read; ++i) {
-                if(buff[i] == '\t') {
-                    tabs +=1;       //tab increased so put information at next tab
-                }else if(tabs==1 || tabs==2){
-                    continue;   
+                if(buff[i] == ' ') {
+                    spaces +=1;       //tab increased so put information at next tab
                 }else if(buff[i]=='\n'){
                     if(gz_gff3_rows>=1 &&(bed_tabs_table[gz_gff3_rows][0] != bed_tabs_table[gz_gff3_rows-1][0])){
                             unique_headers +=1;     //found additional unique header from reference bed file
@@ -336,32 +340,49 @@ int main(int argc, char *argv[]){
                         indexes.push_back(gz_gff3_rows);
                     }
                     gz_gff3_rows+=1; //iterate to next row
-                    tabs=0;         //set tabs back to zero
+                    spaces=0;         //set tabs back to zero
                     prefix = true;
-                }else if(tabs<5){
-                    if(tabs==3){
-                        bed_tabs_table[gz_gff3_rows][tabs-2] +=buff[i];
-                    }else if(tabs==4){
-                        bed_tabs_table[gz_gff3_rows][tabs-2] +=buff[i];
-                        bed_tabs_table[gz_gff3_rows][3] = ("Region:" + bed_tabs_table[gz_gff3_rows][1] + "-" + bed_tabs_table[gz_gff3_rows][2]);
-
-                    }else{
-                        if(prefix==true){bed_tabs_table[gz_gff3_rows][0] += "chr";prefix=false;}
-                        bed_tabs_table[gz_gff3_rows][tabs] +=buff[i];
+                    colon = false;
+                    hyphen = false;
+                }else if(spaces==0 || spaces==2 || spaces==4){
+                    continue;   
+                }else if(spaces==1 || spaces==3){
+                    if(spaces==1 && buff[i]==':'){
+                        colon=true;
+                        continue;
+                    }else if(spaces==1 && colon==true && buff[i]=='-'){
+                            hyphen=true;
+                            continue;
+                    }else if(spaces==1 && colon==false){
+                        bed_tabs_table[gz_gff3_rows][0] +=buff[i];
+                    }else if(spaces==1 && colon==true && hyphen==false){
+                        bed_tabs_table[gz_gff3_rows][1] +=buff[i];
+                    }else if(spaces==1 && colon==true && hyphen==true){
+                        bed_tabs_table[gz_gff3_rows][2] +=buff[i];
+                    
+                    }else if (spaces==3){
+                        bed_tabs_table[gz_gff3_rows][3]+=buff[i];
                     }
                     //bed_tabs_table[gz_gff3_rows][tabs] +=buff[i];
                 }
             }
         }
+
+        for (int i=0; i<region_file_rows; i++){
+            std::cout<< "\n" << i << "\t" << bed_tabs_table[i][0] << "\t" << bed_tabs_table[i][1] << "\t" << bed_tabs_table[i][2] << "\t" << bed_tabs_table[i][3];
+        }
         indexes.push_back(region_file_rows);
         std::cout << "\nThe Unique Headers are: " << unique_headers;
 
         std::string file;
-        file ="g_parsed_file.txt";
+        file ="CNVnator_parsed_file.txt";
         std::ofstream f(file);
 
         for(int i=0; i<region_file_rows; i++){
             for(int j=0; j<4; j++){
+                if(j==0){
+                    f<<"chr";
+                }
                 f <<bed_tabs_table[i][j] <<"\t";
             }f << "\n";
         }
@@ -369,7 +390,76 @@ int main(int argc, char *argv[]){
 
             // Printing the vector
         std::string index_file;
-        index_file = "g_index_file.txt";
+        index_file = "CNVnator_index_file.txt";
+        std::ofstream i(index_file);
+        i << unique_headers << "\n";
+        std::cout<< "\n";
+        for (int num: indexes) {
+            std::cout << num << " ";
+            i << num << " ";
+        }i << "\n";
+        std:: cout<< "\n";
+        for (const std::string& chrms : chrms) {
+            std::cout << "chr" << chrms << " ";
+            i << "chr" << chrms << " ";
+        }std::cout<< "\n";
+        i.close();
+    }if(cn_parse==true){
+        //populating the refseq table
+        int tabs =0, cn_file_rows=0; //tabs and rows when reading file
+        int unique_headers =1;  //for finding amount of headers. At least 1 unique header
+        std::vector<std::string> chrms;
+        std::vector<int> indexes;
+
+        
+        while ((byte_read = gzread(gz_bed_table, buff, sizeof(buff))) > 0) {
+            for (int i = 0; i < byte_read; ++i) {
+                if(buff[i] == '\t') {
+                    tabs +=1;       //tab increased so put information at next tab   
+                }else if(buff[i]=='\n'){
+                    if(cn_file_rows>1 &&(bed_tabs_table[cn_file_rows][0] != bed_tabs_table[cn_file_rows-1][0])){
+                            unique_headers +=1;     //found additional unique header from reference bed file
+                            chrms.push_back(bed_tabs_table[cn_file_rows][0]);
+                            indexes.push_back(cn_file_rows);
+                    }else if (cn_file_rows==0){
+                        chrms.push_back(bed_tabs_table[cn_file_rows][0]);
+                        indexes.push_back(cn_file_rows);
+                    }
+                    cn_file_rows+=1; //iterate to next row
+                    tabs=0;         //set tabs back to zero
+
+                }else if(tabs<=3){
+                   if(tabs==0){
+                    bed_tabs_table[cn_file_rows][0] += buff[i];
+                   }if(tabs==1){
+                    bed_tabs_table[cn_file_rows][1] += buff[i];
+                   }if(tabs==2){
+                    bed_tabs_table[cn_file_rows][2] += buff[i];
+                   }else{
+                    bed_tabs_table[cn_file_rows][3] +=buff[i];
+                   }
+                }
+            }
+        }
+        
+        indexes.push_back(region_file_rows);
+        std::cout << "\nThe Unique Headers are: " << unique_headers;
+
+        std::string CN_file;
+        CN_file = "Location_reference_file.txt";
+
+        std::ofstream c(CN_file);
+
+        for(int i=0; i<region_file_rows; i++){
+            //std::cout<< "\n";
+            c << bed_tabs_table[i][0] << "\t" << bed_tabs_table[i][1] << "\t" << bed_tabs_table[i][2] << "\tRegion:" << bed_tabs_table[i][1] << "-" << bed_tabs_table[i][2] << "\n";
+
+        }
+        c.close();
+
+           // Printing the vector
+        std::string index_file;
+        index_file = "CN_index_file.txt";
         std::ofstream i(index_file);
         i << unique_headers << "\n";
         std::cout<< "\n";
@@ -383,5 +473,6 @@ int main(int argc, char *argv[]){
             i << chrms << " ";
         }std::cout<< "\n";
         i.close();
+
     }
 }
