@@ -420,16 +420,16 @@ std::string output_name, bool chr, bool start_stop, int start, int end, std::str
 
         if(duplicated_autosome==21){
             std::cout<< "\nIndividual Likely Has Down Syndrome";
-            f << "\nIdividual Likely Has Down Syndrome";
+            f << "\nIndividual Likely Has Down Syndrome";
         }else if(duplicated_autosome==18){
             std::cout<< "\nIndividual Likely Has Edwards Syndrome";
-            f << "\nIdividual Likely Has Edwards Syndrome";
+            f << "\nIndividual Likely Has Edwards Syndrome";
         }else if(duplicated_autosome==13){
             std::cout<< "\nIndividual Likely Has Patau Syndrome";
-            f << "\nIdividual Likely Has Patau Syndrome";
+            f << "\nIndividual Likely Has Patau Syndrome";
         }else if(duplicated_autosome==8){
             std::cout<< "\nIndividual Likely Has Warkany Syndrome 2";
-            f << "\nIdividual Likely Has Warkany Syndrome 2";
+            f << "\nIndividual Likely Has Warkany Syndrome 2";
         }
     }
 
@@ -555,7 +555,7 @@ int main(int argc, char *argv[]){
                 << "\n-w or -weighted: Using weighted average for Gen_Variation"
                 << "\n-l or -deletion: Customizable threshold for deletion value. Default is 1.5"
                 << "\n-u or -duplication: Custimizable threshold for duplication value. Default is 2.5"
-                << "\n-m or -pseudo: Labeling pseudoautosomal regions based on build hg38 in Genotype output. Default: unlabeled regions"
+                << "\n-m or -pseudo: Labeling pseudoautosomal regions based on build hg38 in Genotype output. Default: Unlabeled Regions"
                 << "\n\n";
                 return 0; 
         }
