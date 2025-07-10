@@ -7,6 +7,8 @@
 
 Copy Number Private Investigator, CNPI, is a copy number analysis toolkit developed by the Tychele N. Turner, Ph.D. Lab at Washington University in St. Louis Medical School.
 
+Link to paper: https://pubmed.ncbi.nlm.nih.gov/40588120/
+
 **Lead Developer:** Jack Ustanik (jacku[at]wustl.edu)
 
 ## Description
