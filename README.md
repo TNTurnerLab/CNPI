@@ -1,5 +1,5 @@
 
-<h1 align="center">CNPI</h1>
+<h1 align="center">Copy Number Private Investigator - CNPI</h1>
 
 <div align="center">
  <img src=https://github.com/TNTurnerLab/CNPI/blob/main/Photos/CNPI-Logo-Transparent-Background.png alt="CNPI Logo" width="250" />
