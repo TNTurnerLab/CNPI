@@ -134,8 +134,8 @@ This program is designed to read through .gz files containing count number infor
     -e or -chromosome: For displaying a certain chromosome to the terminal  
     -p or -start_stop; For displaying a certain range withing a chromosome to the terminal. Also need to input -e or -chromosome to run
     -w or -weighted: Using weighted average for Gen_Variation
-    -l or -deletion: Customizable threshold for deletion value. Default is 1.3
-    -u or -duplication: Custimizable threshold for duplication value. Default is 2.7
+    -l or -deletion: Customizable threshold for deletion value. Default is 1.5
+    -u or -duplication: Custimizable threshold for duplication value. Default is 2.5
 
 <div align="center">
 
