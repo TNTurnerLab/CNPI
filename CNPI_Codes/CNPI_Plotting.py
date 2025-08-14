@@ -82,7 +82,7 @@ def go_plot(combined_data, kary_array, parent1_type, parent2_type, gstats, gstat
     highest_y = highest_y_chr
     
     if gstats:
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))  # 1 row, 2 columns
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(22, 8))  # 1 row, 2 columns
 
     
     if not gstats:
@@ -173,7 +173,7 @@ def go_plot(combined_data, kary_array, parent1_type, parent2_type, gstats, gstat
                     ax1.add_collection(lc)
     if gstats:
         ax1.set_position([0.05, 0.1, 0.5, 0.8])
-        ax2.set_position([0.65, 0, 0.25, 0.8])
+        ax2.set_position([0.66, 0, 0.25, 0.8])
     if not gstats:
         ax1.set_position([0.04, 0.1, .95, 0.8])
     
@@ -212,7 +212,7 @@ def go_plot(combined_data, kary_array, parent1_type, parent2_type, gstats, gstat
         ax2.axis('tight')
         ax2.axis('off')  # Hide axes
         table = ax2.table(cellText=table_data, colLabels=col_labels, loc='center', cellLoc='center')#, bbox=[-0.1,-0.1,1.3,1.2])
-        table.set_fontsize(20)
+        table.set_fontsize(18)
         table.auto_set_column_width([i for i in range(len(col_labels))])
 
         # Force cell height to fit font
